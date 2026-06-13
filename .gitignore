@@ -1,3 +1,9 @@
+.quarto/
+**/*.quarto_ipynb
+_manuscript/
+_book/
+*.png
+
 # Python-generated files
 __pycache__/
 *.py[oc]

@@ -1,0 +1,15 @@
+project:
+  type: book
+
+book:
+  title: "《数理统计学导论》第 7 版"
+  author: "Hogg"
+  date: "2026/6/13"
+  chapters:
+    - index.qmd
+    - chapters/1.md
+
+# bibliography: references.bib
+
+format:
+  docx: default

@@ -1,0 +1,12 @@
+project:
+  type: book
+
+book:
+  title: "高等数学第8版（同济大学数学科学学院）"
+  # author: "Norah Jones"
+  date: "2026/6/13"
+  chapters:
+    - index.qmd
+
+format:
+  docx: default
