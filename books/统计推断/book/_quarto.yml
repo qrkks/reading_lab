@@ -1,0 +1,16 @@
+project:
+  type: book
+
+book:
+  title: "数理统计"
+  author: "Casella"
+  date: "2026/6/13"
+  chapters:
+    - index.qmd
+    - chapters/1.md
+
+format:
+  docx:
+    from: markdown+tex_math_dollars+tex_math_single_backslash
+    number-depth: 3
+    # toc-depth: 3
