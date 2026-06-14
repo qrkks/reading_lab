@@ -1,0 +1,13 @@
+project:
+  type: book
+
+book:
+  title: "《概率论与数理统计》教学视频 2.0版本【宋浩老师】"
+  author: "宋浩"
+  date: "2026/6/14"
+  chapters:
+    - index.qmd
+    - chapters/1.md
+
+format:
+  docx: default
