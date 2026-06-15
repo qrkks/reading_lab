@@ -1,0 +1,14 @@
+project:
+  type: book
+
+book:
+  title: "概率论与统计推断"
+  author: "Hogg"
+  date: "2026/6/15"
+  chapters:
+    - index.qmd
+    - chapters/1.md
+
+format:
+  docx:
+    number-depth: 3

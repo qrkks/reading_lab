@@ -1,0 +1,3 @@
+Favor	Oppose	NoOpinon
+262	231	10
+302	205	5

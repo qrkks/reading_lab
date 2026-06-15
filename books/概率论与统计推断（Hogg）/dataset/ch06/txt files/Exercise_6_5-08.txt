@@ -1,0 +1,12 @@
+Brand	MPG City	MPG Hwy	CurbWeight
+Ford	20	28	3280
+Chev	24	32	3287
+Toyota	24	34	3240
+Honda	20	29	3344
+Audi	21	29	3825
+BMW	20	29	3450
+Chrys	22	29	3076
+Mercede	19	26	3740
+Volkswa	23	32	3305
+Nissan	26	35	3055
+Kia	24	34	3142
