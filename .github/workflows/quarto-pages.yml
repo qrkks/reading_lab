@@ -30,8 +30,8 @@ jobs:
           set -euo pipefail
 
           slug_for() {
-            case "$1" in
-              # "《概率论与数理统计》教学视频 2.0版本【宋浩老师】")
+            # case "$1" in
+              # "《概率论与数理统计》教学视频2.0版本【宋浩老师】")
               #   echo "songhao-probability-statistics"
               #   ;;
               # "数理统计学导论（Hogg）")
