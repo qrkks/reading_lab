@@ -8,6 +8,7 @@ book:
   chapters:
     - index.qmd
     - chapters/1.md
+    - chapters/2.md
 
 format:
   docx:
