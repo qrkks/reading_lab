@@ -93,7 +93,9 @@ jobs:
               render_dir="$(mktemp -d)"
 
               cp -a "$book_dir" "$render_dir/book"
-              cp _quarto-html.yml "$render_dir/book/_metadata.yml"
+              while IFS= read -r -d '' doc; do
+                cp _quarto-html.yml "$(dirname "$doc")/_metadata.yml"
+              done < <(find "$render_dir/book" -type f \( -name '*.qmd' -o -name '*.md' \) -print0)
               quarto render "$render_dir/book" --to html
 
               mkdir -p "public/$book_slug"
