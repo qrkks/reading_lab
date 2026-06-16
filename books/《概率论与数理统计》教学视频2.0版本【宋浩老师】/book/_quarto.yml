@@ -9,6 +9,7 @@ book:
     - index.qmd
     - chapters/1.md
     - chapters/2.md
+    - chapters/4.md
 
 format:
   docx: default
