@@ -90,12 +90,16 @@ jobs:
               book_dir="$(dirname "$config")"
               book_title="$(basename "$(dirname "$book_dir")")"
               book_slug="$(slug_for "$book_title")"
+              render_dir="$(mktemp -d)"
 
-              quarto render "$book_dir" --to html
+              cp -a "$book_dir" "$render_dir/book"
+              cp _quarto-html.yml "$render_dir/book/_metadata.yml"
+              quarto render "$render_dir/book" --to html
 
               mkdir -p "public/$book_slug"
-              rsync -a --delete "$book_dir/_book/" "public/$book_slug/"
+              rsync -a --delete "$render_dir/book/_book/" "public/$book_slug/"
               printf '      <li><a href="./%s/">%s</a></li>\n' "$book_slug" "$book_title" >> public/index.html
+              rm -rf "$render_dir"
             done
 
           cat >> public/index.html <<'HTML'
