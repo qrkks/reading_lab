@@ -30,29 +30,29 @@ jobs:
           set -euo pipefail
 
           slug_for() {
-            # case "$1" in
-              # "《概率论与数理统计》教学视频2.0版本【宋浩老师】")
-              #   echo "songhao-probability-statistics"
-              #   ;;
-              # "数理统计学导论（Hogg）")
-              #   echo "hogg-introduction-mathematical-statistics"
-              #   ;;
-              # "概率论与数理统计（浙大版）")
-              #   echo "zheda-probability-statistics"
-              #   ;;
-              # "概率论与统计推断（Hogg）")
-              #   echo "hogg-probability-statistical-inference"
-              #   ;;
-              # "统计推断（Casella）")
-              #   echo "casella-statistical-inference"
-              #   ;;
-              # "高等数学第8版（同济大学数学科学学院）")
-              #   echo "tongji-advanced-mathematics"
-              #   ;;
-              # *)
+            case "$1" in
+              "《概率论与数理统计》教学视频2.0版本【宋浩老师】")
+                echo "songhao-probability-statistics"
+                ;;
+              "数理统计学导论（Hogg）")
+                echo "hogg-introduction-mathematical-statistics"
+                ;;
+              "概率论与数理统计（浙大版）")
+                echo "zheda-probability-statistics"
+                ;;
+              "概率论与统计推断（Hogg）")
+                echo "hogg-probability-statistical-inference"
+                ;;
+              "统计推断（Casella）")
+                echo "casella-statistical-inference"
+                ;;
+              "高等数学第8版（同济大学数学科学学院）")
+                echo "tongji-advanced-mathematics"
+                ;;
+              *)
                 echo "$1"
-            #     ;;
-            # esac
+                ;;
+            esac
           }
 
           mkdir -p public
@@ -89,8 +89,8 @@ jobs:
             while IFS= read -r -d '' config; do
               book_dir="$(dirname "$config")"
               book_title="$(basename "$(dirname "$book_dir")")"
-              book_slug="$(slug_for "$book_title")"
-              # book_slug="$book_title"
+              # book_slug="$(slug_for "$book_title")"
+              book_slug="$book_title"
               render_dir="$(mktemp -d)"
 
               cp -a "$book_dir" "$render_dir/book"
