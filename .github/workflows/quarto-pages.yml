@@ -89,7 +89,8 @@ jobs:
             while IFS= read -r -d '' config; do
               book_dir="$(dirname "$config")"
               book_title="$(basename "$(dirname "$book_dir")")"
-              book_slug="$(slug_for "$book_title")"
+              # book_slug="$(slug_for "$book_title")"
+              book_slug="$book_title"
               render_dir="$(mktemp -d)"
 
               cp -a "$book_dir" "$render_dir/book"
