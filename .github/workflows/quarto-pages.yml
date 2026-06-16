@@ -80,7 +80,7 @@ jobs:
           </head>
           <body>
             <h1>Reading Lab</h1>
-            <p>Quarto notes rendered from the repository.</p>
+            # <p>Quarto notes rendered from the repository.</p>
             <ul>
           HTML
 
