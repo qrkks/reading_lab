@@ -8,6 +8,8 @@ book:
   chapters:
     - index.qmd
     - chapters/3.md
+  appendices:
+    - Attachments/Series.md
 
 format:
   docx: default
