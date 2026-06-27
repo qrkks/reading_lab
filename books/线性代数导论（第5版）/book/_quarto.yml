@@ -1,0 +1,13 @@
+project:
+  type: book
+
+book:
+  title: "线性代数导论（第5版）"
+  author: "Strang"
+  date: "2026/6/27"
+  chapters:
+    - index.qmd
+    - chapters/2.md
+
+format:
+  docx: default

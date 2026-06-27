@@ -1,5 +1,4 @@
 # 资源 {.unnumbered}
 
-[视频](https://www.bilibili.com/video/BV1ix411f7Yp)
-
-[官网](https://web.mit.edu/18.06/www/)
+- [视频](https://www.bilibili.com/video/BV1ix411f7Yp)
+- [官网](https://web.mit.edu/18.06/www/)
