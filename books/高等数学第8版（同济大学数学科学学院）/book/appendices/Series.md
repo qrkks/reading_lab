@@ -110,6 +110,9 @@ res = f.series(x,0,3).removeO().series(y,0,3).removeO()
 ```python
 # 方法调用形式（推荐）
 sp.exp(x).series(x, 0, 4)
+```
+
+```python
 # 全局函数形式
 sp.series(sp.exp(x), x, 0, 4)
 ```

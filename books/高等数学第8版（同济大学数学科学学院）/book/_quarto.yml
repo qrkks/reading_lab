@@ -9,7 +9,8 @@ book:
     - index.qmd
     - chapters/3.md
   appendices:
-    - attachments/Series.md
+    - appendices/Series.md
+    - appendices/泰勒公式的顶级理解.md
 
 format:
   docx: default
