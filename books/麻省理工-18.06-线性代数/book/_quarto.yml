@@ -1,0 +1,15 @@
+project:
+  type: book
+
+book:
+  title: "MIT 18.06 Linear Algebra"
+  author: "Strang"
+  date: "2026/6/27"
+  chapters:
+    - index.qmd
+    - chapters/1.md
+  appendices:
+    - appendices/LUsolve方法.md
+
+format:
+  docx: default
