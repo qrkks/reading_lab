@@ -9,7 +9,7 @@ book:
     - index.qmd
     - chapters/3.md
   appendices:
-    - Attachments/Series.md
+    - attachments/Series.md
 
 format:
   docx: default
