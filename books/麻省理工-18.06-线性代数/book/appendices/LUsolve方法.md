@@ -1,3 +1,5 @@
+# LUsolve
+
 ## `ans = A.LUsolve(b)` 完整讲解
 
 ### 一、基础前提：方程形式
