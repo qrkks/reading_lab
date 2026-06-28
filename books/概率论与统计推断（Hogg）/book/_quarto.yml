@@ -10,6 +10,7 @@ book:
     - chapters/1.md
     - chapters/2.md
 
+number-depth: 3
+
 format:
-  docx:
-    number-depth: 3
+  docx: default

@@ -94,8 +94,14 @@ jobs:
               render_dir="$(mktemp -d)"
 
               cp -a "$book_dir" "$render_dir/book"
+              html_metadata="$render_dir/_metadata.yml"
+              cp _quarto-html.yml "$html_metadata"
+              book_number_depth="$(awk '/^number-depth:[[:space:]]*/ { print $2; exit }' "$config")"
+              if [[ -n "$book_number_depth" ]]; then
+                sed -i -E "s/^    number-depth: .*/    number-depth: $book_number_depth/" "$html_metadata"
+              fi
               while IFS= read -r -d '' doc; do
-                cp _quarto-html.yml "$(dirname "$doc")/_metadata.yml"
+                cp "$html_metadata" "$(dirname "$doc")/_metadata.yml"
               done < <(find "$render_dir/book" -type f \( -name '*.qmd' -o -name '*.md' \) -print0)
               quarto render "$render_dir/book" --to html
 

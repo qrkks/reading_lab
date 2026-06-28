@@ -9,8 +9,9 @@ book:
     - index.qmd
     - chapters/1.md
 
+number-depth: 3
+
 format:
   docx:
     from: markdown+tex_math_dollars+tex_math_single_backslash
-    number-depth: 3
     # toc-depth: 3
