@@ -11,5 +11,7 @@ book:
   appendices:
     - appendices/LUsolve方法.md
 
+number-depth: 2
+
 format:
   docx: default
