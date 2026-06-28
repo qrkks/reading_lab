@@ -2,7 +2,7 @@
 
 ## 一、基础定义与语法
 
-`series()` 是 SymPy 专门生成**带佩亚诺余项的泰勒公式**的方法，作用：把一元函数在指定点展开为有限阶泰勒多项式，末尾附带大O余项 $\mathcal{O}(\cdot)$。
+`series()` 是 SymPy 专门生成**带佩亚诺余项的泰勒公式**的方法，作用：把一元函数在指定点展开为有限阶泰勒多项式，末尾附带大 O 余项 $\mathcal{O}(\cdot)$。
 
 ### 标准语法
 
@@ -33,7 +33,7 @@ $$1 + x + \frac{x^2}{2} + \mathcal{O}\left(x^4\right)$$
 
 所有低于 $n$ 次的幂次项，就是我们说的**泰勒展开多项式**。
 
-### 2. $\mathcal{O}(\dots)$ 大O余项（对应高数佩亚诺余项 $o(x^n)$）
+### 2. $\mathcal{O}(\dots)$ 大 O 余项（对应高数佩亚诺余项 $o(x^n)$）
 
 - 含义：所有高于等于 $n$ 次的高阶项全部打包简写；
 - 作用：标记截断后的误差量级；
@@ -47,9 +47,9 @@ print(poly)  # 1 + x + x**2/2
 
 ## 三、分场景用法
 
-### 场景1：麦克劳林展开（中心点 $x_0=0$，矩母函数最常用）
+### 场景 1：麦克劳林展开（中心点 $x_0=0$，矩母函数最常用）
 
-对 $e^{tX}$ 关于 $t$ 在0点展开：
+对 $e^{tX}$ 关于 $t$ 在 0 点展开：
 
 ```python
 t, X = sp.symbols("t X")
@@ -66,9 +66,9 @@ print(ser_pure)
 $$1 + t X + \frac{t^2 X^2}{2} + \frac{t^3 X^3}{6} + \frac{t^4 X^4}{24}$$
 和推导矩母函数 $M(t)=E(e^{tX})$ 用的泰勒展开完全一致。
 
-### 场景2：任意点泰勒展开（$x_0 \neq 0$）
+### 场景 2：任意点泰勒展开（$x_0 \neq 0$）
 
-把 $\sin(x)$ 在 $x=\pi/2$ 展开到3阶：
+把 $\sin(x)$ 在 $x=\pi/2$ 展开到 3 阶：
 
 ```python
 x = sp.Symbol("x")
@@ -77,7 +77,7 @@ sp.sin(x).series(x, sp.pi/2, 4)
 
 输出所有项都是 $(x-\pi/2)$ 的幂次，余项 $\mathcal{O}\left(\left(x-\tfrac{\pi}{2}\right)^4\right)$。
 
-### 场景3：只提取某一阶系数
+### 场景 3：只提取某一阶系数
 
 ```python
 expr = sp.exp(x).series(x,0,6).removeO()
@@ -97,7 +97,7 @@ expr.coeff(x, 3)  # 输出 1/6
 ```python
 x, y = sp.symbols("x y")
 f = sp.exp(x + y)
-# 先展开x，去掉余项，再展开y
+# 先展开 x，去掉余项，再展开 y
 res = f.series(x,0,3).removeO().series(y,0,3).removeO()
 ```
 
