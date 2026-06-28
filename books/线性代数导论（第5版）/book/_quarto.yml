@@ -7,12 +7,8 @@ book:
   date: "2026/6/27"
   chapters:
     - index.qmd
-    - part: "1 向量引论"
-      chapters:
-        - chapters/1.1.md
-    - part: 2.md
-      chapters:
-        - chapters/2.1.md
+    - chapters/1.md
+    - chapters/2.md
 
 format:
   docx: default
