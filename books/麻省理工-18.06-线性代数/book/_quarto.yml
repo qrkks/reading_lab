@@ -10,6 +10,7 @@ book:
     - chapters/1.md
   appendices:
     - appendices/LUsolve方法.md
+    - appendices/Echolen_form & RREF.md
 
 number-depth: 2
 
