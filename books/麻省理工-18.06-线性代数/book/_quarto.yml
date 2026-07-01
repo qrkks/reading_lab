@@ -14,7 +14,7 @@ book:
     - chapters/c2.md
   appendices:
     - appendices/LUsolve方法.md
-    - appendices/Echolen_form & RREF.md
+    - appendices/Echelon_form & RREF.md
 
 number-depth: 2
 
