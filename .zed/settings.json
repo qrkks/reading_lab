@@ -1,0 +1,8 @@
+{
+  "languages": {
+    "Markdown": {
+      // AutoCorrect 2.16.3 reports its non-configurable typo checks as info.
+      "diagnostics_max_severity": "warning"
+    }
+  }
+}
