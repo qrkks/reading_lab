@@ -4,7 +4,7 @@ temp*
 .quarto/
 **/*.quarto_ipynb
 _manuscript/
-_book/
+**/_book/
 *.png
 
 # Python-generated files
