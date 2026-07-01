@@ -17,6 +17,8 @@ book:
     - appendices/Echelon_form & RREF.md
 
 number-depth: 2
+from: markdown+tex_math_single_backslash
 
 format:
-  docx: default
+  docx:
+    toc-depth: 2
