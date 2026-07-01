@@ -8,6 +8,10 @@ book:
   chapters:
     - index.qmd
     - chapters/1.md
+    - chapters/2.md
+    - chapters/3.md
+    - chapters/c1.md
+    - chapters/c2.md
   appendices:
     - appendices/LUsolve方法.md
     - appendices/Echolen_form & RREF.md

@@ -1,9 +1,0 @@
-{
-  "jupyter": {
-    "enabled": true,
-    "kernel_selections": {
-      "python": "reading-lab",
-      "r": "ir",
-    },
-  },
-}
