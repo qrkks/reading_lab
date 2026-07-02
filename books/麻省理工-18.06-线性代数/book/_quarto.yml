@@ -20,5 +20,12 @@ number-depth: 2
 from: markdown+tex_math_single_backslash
 
 format:
+  html: default
+
   docx:
     toc-depth: 2
+
+# math-method: mathjax
+# include-in-header:
+#   text: |
+#     \usepackage{amsmath}
