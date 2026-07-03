@@ -1,0 +1,15 @@
+project:
+  type: book
+
+book:
+  title: "程序员数学：用 Python 学透线性代数和微积分"
+  author: "保罗·奥兰德"
+  date: "2026/7/3"
+  chapters:
+    - index.qmd
+
+bibliography: references.bib
+
+format:
+  html: default
+  docx: default
