@@ -10,6 +10,7 @@ book:
     - chapters/1.md
     - chapters/2.md
     - chapters/3.md
+    - chapters/4.md
     - chapters/c1.md
     - chapters/c2.md
   appendices:
