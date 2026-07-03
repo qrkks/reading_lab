@@ -10,7 +10,5 @@ book:
     - chapters/0.md
     - chapters/1.md
 
-# bibliography: references.bib
-
 format:
   docx: default

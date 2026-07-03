@@ -9,8 +9,6 @@ book:
     - index.qmd
     - chapters/1.md
 
-bibliography: references.bib
-
 format:
   html: default
   docx: default
