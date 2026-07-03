@@ -1,11 +1,14 @@
 temp_records.md
 temp*
 
+
+
 .quarto/
 **/*.quarto_ipynb
 _manuscript/
 **/_book/
 *.png
+*.svg
 
 # Python-generated files
 __pycache__/

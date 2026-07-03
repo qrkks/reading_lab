@@ -7,6 +7,7 @@ book:
   date: "2026/7/3"
   chapters:
     - index.qmd
+    - chapters/2.md
 
 bibliography: references.bib
 

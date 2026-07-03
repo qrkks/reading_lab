@@ -1,0 +1,3 @@
+[submodule "books/程序员数学/data/math-for-programmers"]
+	path = books/程序员数学/data/math-for-programmers
+	url = https://github.com/qrkks/math-for-programmers.git
