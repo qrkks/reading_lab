@@ -11,6 +11,8 @@ book:
     - chapters/2.md
     - chapters/3.md
     - chapters/4.md
+    - chapters/5.md
+    - chapters/6.md
     - chapters/c1.md
     - chapters/c2.md
   appendices:
