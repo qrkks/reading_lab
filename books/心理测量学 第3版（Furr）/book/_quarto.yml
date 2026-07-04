@@ -1,0 +1,14 @@
+project:
+  type: book
+
+book:
+  title: "心理测量学 第 3 版"
+  author: "Furr"
+  date: "2026/7/4"
+  chapters:
+    - index.qmd
+    - chapters/3.md
+
+format:
+  html: default
+  docx: default
