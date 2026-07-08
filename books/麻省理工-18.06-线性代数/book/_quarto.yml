@@ -19,6 +19,7 @@ book:
   appendices:
     - appendices/LUsolve方法.md
     - appendices/Echelon_form & RREF.md
+    - appendices/7.md
 
 number-depth: 2
 from: markdown+tex_math_single_backslash
