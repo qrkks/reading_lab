@@ -14,12 +14,14 @@ book:
     - chapters/5.md
     - chapters/6.md
     - chapters/7.md
+    - chapters/8.md
     - chapters/c1.md
     - chapters/c2.md
   appendices:
     - appendices/LUsolve方法.md
     - appendices/Echelon_form & RREF.md
     - appendices/7.md
+    - appendices/8.md
 
 number-depth: 2
 from: markdown+tex_math_single_backslash
