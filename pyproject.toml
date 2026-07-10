@@ -8,6 +8,7 @@ dependencies = [
     "ipykernel>=7.3.0",
     "ipython>=9.14.1",
     "matplotlib>=3.11.0",
+    "nbclient>=0.10.2",
     "nbformat>=5.10.4",
     "plotly>=6.8.0",
     "polars[pandas]>=1.41.2",
