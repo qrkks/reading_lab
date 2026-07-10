@@ -122,3 +122,7 @@ else:
 [rref 怎么看哪个是解？](../appendices/8.md#rref-怎么看哪个是解)
 
 ### 2 $x_{nullspace}$
+
+[$x_{nullspace}$ 是什么](../appendices/8.md#x_nullspace-是什么)
+
+[我是不是得理解上一节 Ax=0 的一些概念？](../appendices/8.md#我是不是得理解上一节-ax0-的一些概念)

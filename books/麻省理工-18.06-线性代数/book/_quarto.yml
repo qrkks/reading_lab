@@ -28,7 +28,7 @@ from: markdown+tex_math_single_backslash
 
 format:
   html:
-    # css: ../../../assets/main.css
+    # css: ../../../assets/main.css 这个只有放在自己的项目里才生效
     include-in-header:
       file: ../../assets/main-header.html
   docx:
