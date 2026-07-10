@@ -91,6 +91,32 @@ display(Markdown(f"最后一列就是方程的解：${sp.latex(rref_mat[:, -1])}
 display(Markdown("主元列："), pivot)
 ```
 
+```{python}
+import sympy as sp
+from sympy import Matrix
+from IPython.display import display, Markdown
+
+# 求增广矩阵的行最简形，返回 RREF 和主元列下标
+rref_mat, pivots = aug.rref()
+n_vars = aug.cols - 1
+
+display(Markdown("增广矩阵的行最简形："))
+display(rref_mat)
+
+display(Markdown(f"主元列下标（从 0 开始）：`{pivots}`"))
+
+if n_vars in pivots:
+    display(Markdown("方程组无解：增广列是主元列。"))
+
+elif len(pivots) == n_vars:
+    solution = rref_mat[:n_vars, -1]
+    display(Markdown("方程组有唯一解："))
+    display(solution)
+
+else:
+    display(Markdown("方程组有无穷多解：存在自由变量。"))
+```
+
 [怎么用 sympy 求增广矩阵的解？](../appendices/8.md#怎么用-sympy-求增广矩阵的解)
 
 [rref 怎么看哪个是解？](../appendices/8.md#rref-怎么看哪个是解)

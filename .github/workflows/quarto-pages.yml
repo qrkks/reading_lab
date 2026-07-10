@@ -107,7 +107,15 @@ jobs:
               book_slug="$book_title"
               render_dir="$(mktemp -d)"
 
-              cp -a "$book_dir" "$render_dir/book"
+              # Preserve the repository layout in the temporary render tree so
+              # paths such as ../../assets/main-header.html remain valid.
+              temp_book_dir="$render_dir/$book_dir"
+              mkdir -p "$(dirname "$temp_book_dir")"
+              cp -a "$book_dir" "$temp_book_dir"
+              if [[ -d books/assets ]]; then
+                mkdir -p "$render_dir/books"
+                cp -a books/assets "$render_dir/books/assets"
+              fi
               html_metadata="$render_dir/_metadata.yml"
               cp _quarto-html.yml "$html_metadata"
               book_number_depth="$(awk '/^number-depth:[[:space:]]*/ { print $2; exit }' "$config")"
@@ -116,11 +124,11 @@ jobs:
               fi
               while IFS= read -r -d '' doc; do
                 cp "$html_metadata" "$(dirname "$doc")/_metadata.yml"
-              done < <(find "$render_dir/book" -type f \( -name '*.qmd' -o -name '*.md' \) -print0)
-              quarto render "$render_dir/book" --to html
+              done < <(find "$temp_book_dir" -type f \( -name '*.qmd' -o -name '*.md' \) -print0)
+              quarto render "$temp_book_dir" --to html
 
               mkdir -p "public/$book_slug"
-              rsync -a --delete "$render_dir/book/_book/" "public/$book_slug/"
+              rsync -a --delete "$temp_book_dir/_book/" "public/$book_slug/"
               printf '      <li><a href="./%s/">%s</a></li>\n' "$book_slug" "$book_title" >> public/index.html
               rm -rf "$render_dir"
             done
