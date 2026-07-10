@@ -69,7 +69,7 @@ display("*A.rref(): ", *A.rref())
 
 [To find complete solution to Ax=b](../appendices/8.md#to-find-complete-solution-to-axb)
 
-### $x_{particular}$
+### 1 $x_{particular}$
 
 1. Set all free variables to zero
 2. Solve Ax=b for pivot variables
@@ -95,4 +95,4 @@ display(Markdown("主元列："), pivot)
 
 [rref 怎么看哪个是解？](../appendices/8.md#rref-怎么看哪个是解)
 
-### $x_{nullspace}$
+### 2 $x_{nullspace}$
