@@ -2,16 +2,18 @@
 
 ```{python}
 import sympy as sp
+from IPython.display import display, Math
 
 A = sp.Matrix([
     [1, 2, 2, 2],
     [2, 4, 6, 8],
     [3, 6, 8, 10],
 ])
+display(A)
 
 col_basis = A.columnspace()
 print("列空间基：")
-sp.pprint(col_basis)
+display(col_basis)
 print("列空间维数（秩）：", len(col_basis))
 ```
 
