@@ -1,0 +1,33 @@
+# 向量空间与子空间
+
+## 向量空间
+
+[Sympy 有求秩的函数吗？](../appendices/3.qmd#sympy-有求秩的函数吗)
+
+[SymPy 对角相关两个核心函数](../appendices/3.qmd#sympy-对角相关两个核心函数)
+
+[SymPy 提取上三角 / 严格上三角矩阵函数](../appendices/3.qmd#sympy-提取上三角-严格上三角矩阵函数)
+
+> [Sympy 一维扁平列表默认是列](../appendices/3.qmd#sympy-一维扁平列表默认是列)
+
+例 4
+
+```{python}
+import sympy as sp
+from IPython.display import display, Markdown
+
+A = sp.Matrix([
+    [1, 0],
+    [4, 3],
+    [2, 3],
+])
+
+b = sp.Matrix(0.4 * sp.Matrix([1, 4, 2]) + 0.3 * sp.Matrix([0, 3, 3]))
+display(b)  # (0.4, 2,5, 1.7)
+
+display(A.solve(b))
+```
+
+## A 的零空间：求解 Ax = 0 与 Rx = 0
+
+---

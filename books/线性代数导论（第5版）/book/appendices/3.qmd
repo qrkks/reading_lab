@@ -1,0 +1,288 @@
+# 3
+
+## Sympy 有求秩的函数吗？
+
+### SymPy 求矩阵秩函数
+
+#### 1. 核心函数：`matrix.rank()`
+
+##### 示例
+
+```{python}
+import sympy as sp
+
+# 构造矩阵
+A = sp.Matrix([
+    [-2, -3],
+    [1, 0],
+    [0, 1],
+])
+
+# 求秩
+r = A.rank()
+print(r)
+```
+
+#### 2. 底层等价方法（行阶梯求秩）
+
+`A.rref()[0]` 得到行最简形，非零行数就是秩，和 `.rank()` 结果一致：
+
+```{python}
+rref_mat, pivot_cols = A.rref()
+rank = len(pivot_cols)
+print(rank)
+```
+
+#### 3. 分数/符号矩阵通用
+
+`rank()` 支持有理数、含变量符号矩阵，不会出现浮点误差：
+
+```{python}
+M = sp.Matrix([
+    [sp.Rational(1, 2), 3],
+    [4, sp.Rational(5, 3)],
+])
+print(M.rank())
+```
+
+#### 4. 配套 LaTeX 输出完整示例
+
+```{python}
+import sympy as sp
+from IPython.display import display, Markdown
+
+A = sp.Matrix([
+    [-2, -3],
+    [1, 0],
+    [0, 1],
+])
+
+rank_A = A.rank()
+
+display(Markdown(rf"$\operatorname{{rank}}(A) = {rank_A}$"))
+
+# latex_str = rf"\operatorname{rank}(A) = {rank_A}"
+# display(Latex(latex_str))
+```
+
+##### 补充说明
+
+- 实数域求秩：`matrix.rank()` 默认在有理数/实数域计算；
+- 复数域秩同样适用，输入复数矩阵直接调用即可；
+- 相比 numpy，SymPy 无浮点精度丢失，适合线性代数作业。
+
+## SymPy 对角相关两个核心函数
+
+### 1. 从向量/列表生成对角矩阵 `diag()`
+
+#### 用法：sp.diag(元素 1, 元素 2, ...)
+
+输入一串数字/符号，生成对角阵，其余位置 0
+
+```{python}
+import sympy as sp
+
+# 1. 数值对角矩阵
+D = sp.diag(-2, 0, 5)
+display(D)
+
+# 2. 符号对角矩阵
+x, y = sp.symbols("x y")
+D2 = sp.diag(x, y, 1)
+display(D2)
+
+# 3. 传入向量/列表也行
+v = sp.Matrix([1, 3, sp.Rational(1, 2)])
+D3 = sp.diag(*v)
+display(D3)
+```
+
+---
+
+输出：
+
+$$
+D=
+\begin{bmatrix}
+-2 & 0 & 0\\
+0 & 0 & 0\\
+0 & 0 & 5
+\end{bmatrix}
+$$
+
+### 2. 提取矩阵对角线元素 `matrix.diagonal()`
+
+把已有矩阵主对角线抽成一维向量
+
+```{python}
+A = sp.Matrix([
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+])
+
+diag_elems = A.diagonal()
+display(diag_elems)  # [1, 5, 9]
+```
+
+### 3. 提取对角线再生成对角矩阵（常用组合）
+
+```{python}
+A = sp.Matrix([
+    [2, 1, 0],
+    [3, 4, 5],
+    [0, 1, -1],
+])
+# 先取对角线，再做成对角阵
+D = sp.diag(*A.diagonal())
+display(D)
+```
+
+### 4. 补充：分块对角矩阵
+
+`sp.diag()` 也支持传入多个矩阵，生成分块对角阵
+
+```{python}
+M1 = sp.Matrix([
+    [1, 2],
+    [3, 4],
+])
+M2 = sp.Matrix([5])
+block_D = sp.diag(M1, M2)
+display(block_D)
+```
+
+### 关键区分
+
+- `sp.diag(a,b,c)`：**构造**对角矩阵
+- `M.diagonal()`：**提取**矩阵对角线元素
+
+## SymPy 提取上三角 / 严格上三角矩阵函数
+
+### 1. 上三角（含主对角线）：`M.upper_triangular()`
+
+保留主对角线及上方元素，下方全部置 0
+
+```{python}
+import sympy as sp
+
+A = sp.Matrix([
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+])
+
+U = A.upper_triangular()
+display(U)
+```
+
+输出：
+
+$$
+\begin{bmatrix}
+1 & 2 & 3 \\
+0 & 5 & 6 \\
+0 & 0 & 9
+\end{bmatrix}
+$$
+
+### 2. 严格上三角（不含主对角线）：`M.strict_upper_triangular()`
+
+仅保留对角线右上方，对角线、下三角清零
+
+```{python}
+# k=1：从第一条上对角线（超对角线）开始，主对角线清零
+U_strict = A.upper_triangular(1)
+display(U_strict)
+```
+
+$$
+\begin{bmatrix}
+0 & 2 & 3 \\
+0 & 0 & 6 \\
+0 & 0 & 0
+\end{bmatrix}
+$$
+
+### 配套：下三角相关（补充对照）
+
+- `M.lower_triangular()`：含对角线下三角
+- `M.strict_lower_triangular()`：不含对角线严格下三角
+
+### 常用场景：矩阵分解后提取 U
+
+比如 LU 分解：
+
+```{python}
+A = sp.Matrix([
+    [2, 1],
+    [1, 3],
+])
+L, U, perm = A.LUdecomposition()
+display(L, U, perm)
+```
+
+这里返回的 `U` 本身就是上三角矩阵。
+
+### 补充说明
+
+线性代数记号习惯：
+
+- $U$ = Upper triangular（上三角），对应 `.upper_triangular()`
+- $L$ = Lower triangular（下三角），对应 `.lower_triangular()`
+
+## Sympy 一维扁平列表默认是列
+
+SymPy 对**一维扁平列表 `[a,b,c]`** 和**嵌套列表 `[[a,b,c]]`** 有完全不同的解析逻辑：
+
+1. **`Matrix([1,2,3])`：单层单括号、一维列表 → 自动解析为【列向量 n×1】**
+
+```{python}
+import sympy as sp
+
+v_col = sp.Matrix([1, 2, 3])
+print(v_col.shape)  # 输出 (3, 1)  3 行 1 列，竖排列向量
+display(v_col)
+```
+
+打印效果：
+$$\begin{bmatrix}1\\2\\3\end{bmatrix}$$
+
+2. **`Matrix([[1,2,3]])`：双层嵌套列表 → 解析为【行向量 1×n】**
+
+```{python}
+v_row = sp.Matrix([[1, 2, 3]])
+print(v_row.shape)  # 输出 (1, 3)  1 行 3 列，横排行向量
+display(v_row)
+```
+
+打印效果：
+$$\begin{bmatrix}1 & 2 & 3\end{bmatrix}$$
+
+### 官方文档说明
+
+SymPy 设计初衷：线性代数里**列向量使用频率远高于行向量**，所以把最简写法 `Matrix([a,b,c])` 分配给列向量，减少多层括号书写负担。
+
+### 补充区分记忆口诀
+
+- 单层 `[x,y,z]` → 竖起来，**列向量**（n 行 1 列）
+- 双层 `[[x,y,z]]` → 横一排，**行向量**（1 行 n 列）
+- 多层嵌套 `[[a,b],[c,d]]` → 标准二维矩阵，每一个内层 `[]` 代表一行
+
+### 验证对比代码
+
+```{python}
+import sympy as sp
+
+# 单层：列向量
+v1 = sp.Matrix([1, 2])
+print("Matrix([1,2]) shape:", v1.shape)  # (2, 1)
+
+# 双层：行向量
+v2 = sp.Matrix([[1, 2]])
+print("Matrix([[1,2]]) shape:", v2.shape)  # (1, 2)
+
+# 转置互相转换
+print("行向量转置：", v2.T.shape)  # (2,1) 变成列向量
+print("列向量转置：", v1.T.shape)  # (1,2) 变成行向量
+```

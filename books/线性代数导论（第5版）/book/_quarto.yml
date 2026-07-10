@@ -9,8 +9,13 @@ book:
     - index.qmd
     - chapters/1.md
     - chapters/2.md
-    - chapters/3.md
+    - chapters/3.qmd
     - chapters/12.md
+  appendices:
+    - appendices/3.qmd
 
 format:
   docx: default
+  html:
+    include-in-header:
+      file: ../../assets/main-header.html
