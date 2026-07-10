@@ -6,7 +6,7 @@
       "source": [
         "# Ax = b 可解性及解的结构"
       ],
-      "id": "f20a3cbd"
+      "id": "e3d8416b"
     },
     {
       "cell_type": "code",
@@ -35,7 +35,7 @@
         "display(*col_basis)\n",
         "print(\"列空间维数（秩）：\", col_basis_matrix.rank())"
       ],
-      "id": "64532946",
+      "id": "f0d5ca13",
       "execution_count": null,
       "outputs": []
     },
@@ -48,7 +48,7 @@
         "[如果要方程组有解，b\n",
         "需要符合什么条件？](../appendices/8.md#如果要方程组有解b-需要符合什么条件)"
       ],
-      "id": "9bf86f67"
+      "id": "519c1323"
     },
     {
       "cell_type": "code",
@@ -74,7 +74,7 @@
         "display(\"A.rref(): \", A.rref())\n",
         "display(\"*A.rref(): \", *A.rref())"
       ],
-      "id": "67a606e6",
+      "id": "28aaf001",
       "execution_count": null,
       "outputs": []
     },
@@ -104,7 +104,7 @@
         "1. Set all free variables to zero\n",
         "2. Solve Ax=b for pivot variables"
       ],
-      "id": "dee8e4c3"
+      "id": "ab08304e"
     },
     {
       "cell_type": "code",
@@ -125,7 +125,7 @@
         "display(Markdown(f\"最后一列就是方程的解：${sp.latex(rref_mat[:, -1])}$\"))\n",
         "display(Markdown(\"主元列：\"), pivot)"
       ],
-      "id": "45aa182d",
+      "id": "f31bfa56",
       "execution_count": null,
       "outputs": []
     },
@@ -139,7 +139,7 @@
         "\n",
         "### 2 $x_{nullspace}$"
       ],
-      "id": "d8f89619"
+      "id": "6c7cf3c6"
     }
   ],
   "metadata": {

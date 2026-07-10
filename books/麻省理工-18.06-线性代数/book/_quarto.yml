@@ -30,7 +30,7 @@ format:
   html:
     # css: ../../../assets/main.css
     include-in-header:
-      file: ../../../assets/main-header.html
+      file: ../../assets/main-header.html
   docx:
     toc-depth: 2
 
