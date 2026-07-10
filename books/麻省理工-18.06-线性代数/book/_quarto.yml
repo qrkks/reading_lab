@@ -14,7 +14,7 @@ book:
     - chapters/5.md
     - chapters/6.md
     - chapters/7.md
-    - chapters/8.md
+    - chapters/8.qmd
     - chapters/c1.md
     - chapters/c2.md
   appendices:
