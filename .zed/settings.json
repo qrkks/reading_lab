@@ -1,0 +1,23 @@
+{
+  "file_types": {
+    "Markdown": ["*.qmd"],
+  },
+  // "languages": {
+  //   "Markdown": {
+  //     "format_on_save": "on",
+  //     "formatter": {
+  //       "external": {
+  //         "command": "C:\\Users\\dell\\.cargo\\bin\\panache.exe",
+  //         "arguments": [
+  //           "format",
+  //           "--config",
+  //           "C:\\Users\\dell\\.config\\panache\\config.toml",
+  //           "--stdin-filename",
+  //           "{buffer_path}",
+  //           "-"
+  //         ]
+  //       }
+  //     }
+  //   }
+  // }
+}

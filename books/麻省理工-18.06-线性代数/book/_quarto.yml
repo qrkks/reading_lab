@@ -27,8 +27,10 @@ number-depth: 2
 from: markdown+tex_math_single_backslash
 
 format:
-  html: default
-
+  html:
+    css: ../../../assets/main.css
+    # include-in-header:
+    #   file: ../../../assets/main-header.html
   docx:
     toc-depth: 2
 

@@ -12,17 +12,27 @@ A = sp.Matrix([
 display(A)
 
 col_basis = A.columnspace()
-print("列空间基：")
+# 水平拼接：每一列对应一个基向量
+col_basis_matrix = sp.Matrix.hstack(*col_basis)
+
+print("列空间基矩阵（每一列是一个基向量）：")
+print("col_basis: ")
 display(col_basis)
-print("列空间维数（秩）：", len(col_basis))
+print("col_basis_matrix: ")
+display(col_basis_matrix)
+print("*col_basis")
+display(*col_basis)
+print("列空间维数（秩）：", col_basis_matrix.rank())
 ```
 
 [sympy 能解非齐次方程吗？](../appendices/8.md#sympy-能解非齐次方程吗)
 
-[如果要方程组有解，b 需要符合什么条件？](../appendices/8.md#如果要方程组有解b-需要符合什么条件)
+[如果要方程组有解，b
+需要符合什么条件？](../appendices/8.md#如果要方程组有解b-需要符合什么条件)
 
 ```{python}
 import sympy as sp
+from IPython.display import display, Latex, Markdown
 
 b1, b2, b3 = sp.symbols("b1,b2,b3")
 
@@ -31,13 +41,58 @@ A = sp.Matrix([
     [2, 4, 6, 8, b2],
     [3, 6, 8, 10, b3],
 ])
-sp.pprint(A)
+U = A.echelon_form()
+display(A)
 print("echelon form: ")
-sp.pprint(A.echelon_form())
+display(U)
+display(U[-1, -1])
+display(Markdown(f"方程组有没有解由 $U_{{-1,-1}}={sp.latex(U[-1, -1])}$ 决定。"))
 print("RREF: ")
-sp.pprint(A.rref())
+display("A.rref(): ", A.rref())
+display("*A.rref(): ", *A.rref())
 ```
 
-# 23424
+## 可解性（Solvability Condition on b）
 
-234234
+[我们看 AX 等于 B
+有没有解，就是它的可解性吗？就是讨论它的可解性吗？](../appendices/8.md#我们看-ax-等于-b-有没有解就是它的可解性吗就是讨论它的可解性吗)
+
+### $Ax=b \text{ solvable when } b \text{ is in } C(A)$
+
+[$Ax=b \text{ solvable when } b \text{ is in } C(A)$](../appendices/8.md#axb-text-solvable-when-b-text-is-in-ca)
+
+### If a combination of rows of A gives zero row then Same combination of b must give zero (number)
+
+[If a combination of rows of A gives zero row then Same combination of b must give zero (number)](../appendices/8.md#if-a-combination-of-rows-of-a-gives-zero-row-then-same-combination-of-b-must-give-zero-number)
+
+## To find complete solution to Ax=b
+
+[To find complete solution to Ax=b](../appendices/8.md#to-find-complete-solution-to-axb)
+
+### $x_{particular}$
+
+1. Set all free variables to zero
+2. Solve Ax=b for pivot variables
+
+```{python}
+import sympy as sp
+from IPython.display import display, Math, Markdown
+
+# 构造增广矩阵 [A|b]
+aug = sp.Matrix([
+    [1, 2, 1],
+    [0, 2, 3],
+])
+
+# 求行最简形，返回 (rref矩阵, 主元列下标)
+rref_mat, pivot = aug.rref()
+display(Markdown("增广矩阵行最简形："), rref_mat)
+display(Markdown(f"最后一列就是方程的解：${sp.latex(rref_mat[:, -1])}$"))
+display(Markdown("主元列："), pivot)
+```
+
+[怎么用 sympy 求增广矩阵的解？](../appendices/8.md#怎么用-sympy-求增广矩阵的解)
+
+[rref 怎么看哪个是解？](../appendices/8.md#rref-怎么看哪个是解)
+
+### $x_{nullspace}$
