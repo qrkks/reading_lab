@@ -11,6 +11,7 @@ dependencies = [
     "nbformat>=5.10.4",
     "plotly>=6.8.0",
     "polars[pandas]>=1.41.2",
+    "pyyaml>=6.0.2",
     "scipy>=1.17.1",
     "sympy>=1.14.0",
 ]
