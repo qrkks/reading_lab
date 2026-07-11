@@ -86,4 +86,116 @@ display(B.rref())
 
 ## A 的零空间：求解 Ax = 0 与 Rx = 0
 
----
+```{python}
+from sympy import Matrix
+from IPython.display import display, Markdown
+
+A = Matrix([
+    [1, 0],
+    [0, 1],
+])
+B = Matrix([
+    [1, 2],
+    [0, 0],
+])
+display(Markdown("rank:"))
+display(A.rank(), B.rank())
+display(Markdown("nullspace:"))
+display("A", *A.nullspace(), "B", *B.nullspace())
+display(Markdown("upper_triangular:"))
+display(A.upper_triangular(), B.upper_triangular())
+display(Markdown("LUdecomposition:"))
+display("A", *A.LUdecomposition(), "B", *B.LUdecomposition())
+display(Markdown("rref"))
+display("A", *A.rref(), "B", *B.rref())
+```
+
+[当各列都不相关的时候，方程组=0 ~~无解~~ 只有零解，0 空间只有 0？](../appendices/3.2.qmd#当各列都不相关的时候方程组0-无解0-空间只有-0)
+
+例 1
+
+```{python}
+from sympy import Matrix
+from IPython.display import display, Markdown
+
+A = Matrix([
+    [1, 2],
+    [3, 6],
+])
+
+display(Markdown("det:"))
+display(A.det())
+display(Markdown("rref:"))
+display(*A.rref())
+display(Markdown("特殊解："))
+display(*A.nullspace())
+display(Markdown("通解："))
+display(*A.gauss_jordan_solve(Matrix.zeros(A.rows, 1)))
+```
+
+[特殊解](../appendices/3.2.qmd#特殊解)
+
+例 2
+
+```{python}
+from sympy import Matrix
+from IPython.display import display, Markdown
+
+A = Matrix([[1, 2, 3]])
+
+display(A.rank())
+display(A.nullspace())
+display(A.gauss_jordan_solve(Matrix.zeros(1, 1)))
+display(A.gauss_jordan_solve(Matrix.zeros(1, 1), freevar=True))  # 可以看自由列
+display(A.rref())
+```
+
+[0 空间的维度](../appendices/3.2.qmd#0-空间的维度)
+
+[这里面是不是只有 rref 能看自由列是哪一列？](../appendices/3.2.qmd#这里面是不是只有-rref-能看自由列是哪一列)
+
+[x+2y+3z = 6 怎么求它的解？](../appendices/3.2.qmd#x2y3z-6-怎么求它的解)
+
+[计算特殊解](../appendices/3.2.qmd#计算特殊解)
+
+例 3
+
+```{python}
+from sympy import Matrix
+from IPython.display import display, Markdown
+
+# 定义A
+A = Matrix([
+    [1, 2],
+    [3, 8],
+])
+
+# B = [A; 2A] 纵向上下拼接（vstack）
+B = Matrix.vstack(A, 2 * A)
+
+# C = [A 2A] 横向左右拼接（hstack）
+C = Matrix.hstack(A, 2 * A)
+
+# 打印查看
+display("A =", A)
+display("B =", B)
+display("C =", C)
+
+display(Markdown("rref:"))
+display(*A.rref(), *B.rref(), *C.rref())
+
+display(Markdown("nullspace:"))
+display(*A.nullspace(), *B.nullspace(), *C.nullspace())
+
+display(Markdown("gauss_jordan_solve:"))
+for M in (A, B, C):
+    display(*M.gauss_jordan_solve(Matrix.zeros(M.rows, 1), freevar=True))
+```
+
+[特解（particular solution）与特殊解（special solution）](../appendices/3.2.qmd#特解particular-solution与特殊解special-solution)
+
+```{python}
+display("C", C)
+display("U", *C.echelon_form(with_pivots=True))
+display("R", *C.rref())
+```
