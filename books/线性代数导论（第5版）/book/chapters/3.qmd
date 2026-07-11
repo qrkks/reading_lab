@@ -2,13 +2,13 @@
 
 ## 向量空间
 
-[Sympy 有求秩的函数吗？](../appendices/3.qmd#sympy-有求秩的函数吗)
+[Sympy 有求秩的函数吗？](../appendices/3.1.qmd#sympy-有求秩的函数吗)
 
-[SymPy 对角相关两个核心函数](../appendices/3.qmd#sympy-对角相关两个核心函数)
+[SymPy 对角相关两个核心函数](../appendices/3.1.qmd#sympy-对角相关两个核心函数)
 
-[SymPy 提取上三角 / 严格上三角矩阵函数](../appendices/3.qmd#sympy-提取上三角-严格上三角矩阵函数)
+[SymPy 提取上三角 / 严格上三角矩阵函数](../appendices/3.1.qmd#sympy-提取上三角-严格上三角矩阵函数)
 
-> [Sympy 一维扁平列表默认是列](../appendices/3.qmd#sympy-一维扁平列表默认是列)
+> [Sympy 一维扁平列表默认是列](../appendices/3.1.qmd#sympy-一维扁平列表默认是列)
 
 例 4
 
@@ -28,23 +28,61 @@ display(b)  # (0.4, 2,5, 1.7)
 display(A.solve(b))
 ```
 
-[那当 m<n 的时候，怎么理解这个事情](../appendices/3.qmd#那当-mn-的时候怎么理解这个事情)
+[那当 m<n 的时候，怎么理解这个事情](../appendices/3.1.qmd#那当-mn-的时候怎么理解这个事情)
 
-[三维之内的还比较好理解，每个维度都是垂直的，三维以上的呢？维度也是垂直的吗？](../appendices/3.qmd#三维之内的还比较好理解每个维度都是垂直的三维以上的呢维度也是垂直的吗)
+[三维之内的还比较好理解，每个维度都是垂直的，三维以上的呢？维度也是垂直的吗？](../appendices/3.1.qmd#三维之内的还比较好理解每个维度都是垂直的三维以上的呢维度也是垂直的吗)
 
-[就是 n 维空间的坐标轴是垂直的，向量间不一定是垂直的？](../appendices/3.qmd#就是-n-维空间的坐标轴是垂直的向量间不一定是垂直的)
+[就是 n 维空间的坐标轴是垂直的，向量间不一定是垂直的？](../appendices/3.1.qmd#就是-n-维空间的坐标轴是垂直的向量间不一定是垂直的)
 
-[维度真正依赖的是线性无关怎么理解？](../appendices/3.qmd#维度真正依赖的是线性无关怎么理解)
+[维度真正依赖的是线性无关怎么理解？](../appendices/3.1.qmd#维度真正依赖的是线性无关怎么理解)
 
-[线性无关的英语是什么，我觉得这可能是卡点](../appendices/3.qmd#线性无关的英语是什么我觉得这可能是卡点)
+[线性无关的英语是什么，我觉得这可能是卡点](../appendices/3.1.qmd#线性无关的英语是什么我觉得这可能是卡点)
 
-[这在第三章需要理解到什么程度可以往后？](../appendices/3.qmd#这在第三章需要理解到什么程度可以往后)
+[这在第三章需要理解到什么程度可以往后？](../appendices/3.1.qmd#这在第三章需要理解到什么程度可以往后)
 
-[$Ax=0$ 存在非零解说明什么？说明 $A$ 的列线性相关。这个好像不太理解](../appendices/3.qmd#ax0-存在非零解说明什么说明-a-的列线性相关这个好像不太理解)
+[$Ax=0$ 存在非零解说明什么？说明 $A$ 的列线性相关。这个好像不太理解](../appendices/3.1.qmd#ax0-存在非零解说明什么说明-a-的列线性相关这个好像不太理解)
 
-[那解线性方程组相当于找出那个线性相关的关系来？](../appendices/3.qmd#那解线性方程组相当于找出那个线性相关的关系来)
+[那解线性方程组相当于找出那个线性相关的关系来？](../appendices/3.1.qmd#那解线性方程组相当于找出那个线性相关的关系来)
 
-[$b\neq0$的话，那 Ax 的线性组合还叫线性相关吗？](../appendices/3.qmd#bneq0的话那-ax-的线性组合还叫线性相关吗)
+[$b\neq0$的话，那 Ax 的线性组合还叫线性相关吗？](../appendices/3.1.qmd#bneq0的话那-ax-的线性组合还叫线性相关吗)
+
+例 5
+
+```{python}
+from sympy import Matrix
+from IPython.display import display, Markdown
+
+B = Matrix([
+    [1, 2, 3],
+    [0, 0, 4],
+])
+
+b = Matrix([5, 4])
+
+display(Markdown(f"rank = ${B.rank()}$"))
+# display(Markdown(f"nullspace = ${latex(B.nullspace())}$"))
+display(Markdown("<br>nullspace = "))
+display(B.nullspace())
+# display(B.solve(b))  # 它只用于方阵求解
+display(Markdown("\n\ngauss_jordan_solve = "))
+display(B.gauss_jordan_solve(b))
+display(Markdown("  \nrref = "))
+display(B.rref())
+```
+
+[Sympy 中有没有看线性相关的函数？](../appendices/3.1.qmd#sympy-中有没有看线性相关的函数)
+
+[A.nullspace() 算出来的就是线性相关的系数啊，就是当 b=0 的时候方程组的解？](../appendices/3.1.qmd#anullspace-算出来的就是线性相关的系数啊就是当-b0-的时候方程组的解)
+
+[0 空间不可能有唯一值，要么无解，要么多解？](../appendices/3.1.qmd#0-空间不可能有唯一值要么无解要么多解)
+
+[噢，0 空间不可能有唯一非 0 解，也不可能无解；要么唯一解是 0，要么无穷多解](../appendices/3.1.qmd#噢0-空间不可能有唯一非-0-解也不可能无解要么唯一解是-0要么无穷多解)
+
+[m<n 时肯定有线性相关的列？](../appendices/3.1.qmd#mn-时肯定有线性相关的列)
+
+[display(B.solve(b)) 报错](../appendices/3.1.qmd#displaybsolveb-报错)
+
+[特解是什么，每个人算的特解不一样吗？](../appendices/3.1.qmd#特解是什么每个人算的特解不一样吗)
 
 ## A 的零空间：求解 Ax = 0 与 Rx = 0
 
