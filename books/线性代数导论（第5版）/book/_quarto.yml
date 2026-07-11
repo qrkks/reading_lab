@@ -10,6 +10,7 @@ book:
     - chapters/1.md
     - chapters/2.md
     - chapters/3.qmd
+    - chapters/4.qmd
     - chapters/12.md
   appendices:
     - appendices/3.qmd
