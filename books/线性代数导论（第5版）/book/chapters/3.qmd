@@ -199,3 +199,64 @@ display("C", C)
 display("U", *C.echelon_form(with_pivots=True))
 display("R", *C.rref())
 ```
+
+### 矩阵的秩
+
+```{python}
+from sympy import Matrix
+from IPython.display import display, Markdown
+
+A = Matrix([[1, 1, 2, 4], [1, 2, 2, 5], [1, 3, 2, 6]])
+R = A.rref()
+display(A)
+display(*R)
+display(*A.nullspace())
+display(*A.gauss_jordan_solve(Matrix.zeros(A.rows, 1)))
+```
+
+[每个“自由列“都是前面主元列的线性组合，而特殊解 s 中包含这些线性组合的系数：是什么意思？](../appendices/3.2.qmd#每个自由列都是前面主元列的线性组合而特殊解-s-中包含这些线性组合的系数是什么意思)
+
+[`[-2,0,1,0]`里的`[1,0]`是谁的取值？](../appendices/3.2.qmd#2010里的10是谁的取值)
+
+```{python}
+from sympy import Matrix, symbols, solve
+from IPython.display import display, Markdown
+
+x1, x2, x3, x4 = symbols("x1,x2,x3,x4")
+print(solve(x1 + 2 * x3 + 3 * x4, x3))
+```
+
+[`A = Matrix([[1, 1, 2, 4], [1, 2, 2, 5], [1, 3, 2, 6]])`用这个举例说明组合系数](../appendices/3.2.qmd#a-matrix1-1-2-4-1-2-2-5-1-3-2-6用这个举例说明组合系数)
+
+### 秩 1 矩阵
+
+```{python}
+from sympy import Matrix
+from IPython.display import display, Markdown
+
+A = Matrix([
+    [1, 3, 10],
+    [2, 6, 20],
+    [3, 9, 30],
+])
+display("A", A)
+
+R, _ = A.rref()
+display("R", R)
+
+u = A[:, 0]
+display("u", u)
+vT = A[0, :]  # vT 只是恰好能用，实际是需要计算，见附录
+display("vT", vT)
+
+B = u * vT
+display("b", B)
+display("A == B", A == B)
+```
+
+[vT 只是恰好能用，实际是需要找的？那直接看出来的还是可以用 sympy 计算出来的？](../appendices/3.2.qmd#vt-只是恰好能用实际是需要找的那直接看出来的还是可以用-sympy-计算出来的)
+
+[u 为什么叫方向，它不只是一个点吗？](../appendices/3.2.qmd#u-为什么叫方向它不只是一个点吗)
+
+[dim](../appendices/4.md#dim)
+
