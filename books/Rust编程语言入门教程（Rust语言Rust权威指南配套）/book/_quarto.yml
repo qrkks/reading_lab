@@ -1,0 +1,15 @@
+project:
+  type: book
+
+book:
+  title: "Rust 编程语言入门教程（Rust 语言/Rust 权威指南配套）"
+  author: "Up：软件工艺师"
+  date: "2026/7/12"
+  chapters:
+    - index.qmd
+    - chapters/3.md
+
+format:
+  html: default
+
+# number-sections: false
