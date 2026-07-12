@@ -8,6 +8,10 @@ book:
   chapters:
     - index.qmd
     - chapters/3.md
+    - chapters/4.md
+  appendices:
+    - appendices/3.md
+    - appendices/4.md
 
 format:
   html: default
