@@ -1,0 +1,18 @@
+project:
+  type: book
+
+book:
+  title: "8 小时带你快速入门 Go 语言"
+  author: "Up：枫枫讲 Go 语言"
+  date: "2026/7/13"
+  chapters:
+    - index.qmd
+    - chapters/7.md
+  appendices:
+    - appendices/7.md
+
+format:
+  html:
+    theme:
+      - cosmo
+      - brand
