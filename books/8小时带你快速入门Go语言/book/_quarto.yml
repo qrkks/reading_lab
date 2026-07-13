@@ -9,9 +9,11 @@ book:
     - index.qmd
     - chapters/7.md
     - chapters/8.md
+    - chapters/9.md
   appendices:
     - appendices/7.md
     - appendices/8.md
+    - appendices/9.md
 
 format:
   html:
