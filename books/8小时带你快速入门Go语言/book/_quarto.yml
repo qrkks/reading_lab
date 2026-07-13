@@ -8,8 +8,10 @@ book:
   chapters:
     - index.qmd
     - chapters/7.md
+    - chapters/8.md
   appendices:
     - appendices/7.md
+    - appendices/8.md
 
 format:
   html:
