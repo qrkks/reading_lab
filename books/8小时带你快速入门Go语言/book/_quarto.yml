@@ -10,10 +10,14 @@ book:
     - chapters/7.md
     - chapters/8.md
     - chapters/9.md
+    - chapters/10.md
+    - chapters/11.md
   appendices:
     - appendices/7.md
     - appendices/8.md
     - appendices/9.md
+    - appendices/10.md
+    - appendices/11.md
 
 format:
   html:
