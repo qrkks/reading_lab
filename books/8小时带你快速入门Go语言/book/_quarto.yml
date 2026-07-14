@@ -13,6 +13,7 @@ book:
     - chapters/10.md
     - chapters/11.md
     - chapters/12.md
+    - chapters/13.md
   appendices:
     - appendices/7.md
     - appendices/8.md
@@ -20,6 +21,7 @@ book:
     - appendices/10.md
     - appendices/11.md
     - appendices/12.md
+    - appendices/13.md
 
 format:
   html:
