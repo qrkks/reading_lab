@@ -24,6 +24,15 @@ jobs:
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
 
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.6"
+
+      - name: Install Julia dependencies
+        shell: bash
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -125,7 +134,7 @@ jobs:
               while IFS= read -r -d '' doc; do
                 cp "$html_metadata" "$(dirname "$doc")/_metadata.yml"
               done < <(find "$temp_book_dir" -type f \( -name '*.qmd' -o -name '*.md' \) -print0)
-              quarto render "$temp_book_dir" --to html
+              JULIA_PROJECT="$GITHUB_WORKSPACE" quarto render "$temp_book_dir" --to html
 
               mkdir -p "public/$book_slug"
               rsync -a --delete "$temp_book_dir/_book/" "public/$book_slug/"
