@@ -125,6 +125,9 @@ jobs:
                 mkdir -p "$render_dir/books"
                 cp -a books/assets "$render_dir/books/assets"
               fi
+              # Julia notebook workers start with --project=@. and search
+              # upward from each QMD file inside the temporary render tree.
+              cp Project.toml Manifest.toml "$render_dir/"
               html_metadata="$render_dir/_metadata.yml"
               cp _quarto-html.yml "$html_metadata"
               book_number_depth="$(awk '/^number-depth:[[:space:]]*/ { print $2; exit }' "$config")"
@@ -134,7 +137,7 @@ jobs:
               while IFS= read -r -d '' doc; do
                 cp "$html_metadata" "$(dirname "$doc")/_metadata.yml"
               done < <(find "$temp_book_dir" -type f \( -name '*.qmd' -o -name '*.md' \) -print0)
-              JULIA_PROJECT="$GITHUB_WORKSPACE" quarto render "$temp_book_dir" --to html
+              quarto render "$temp_book_dir" --to html
 
               mkdir -p "public/$book_slug"
               rsync -a --delete "$temp_book_dir/_book/" "public/$book_slug/"

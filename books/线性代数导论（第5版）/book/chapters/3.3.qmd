@@ -1,0 +1,58 @@
+---
+engine: julia
+---
+
+# 特解 $Ax_p=b$
+
+```{julia}
+using RowEchelon
+using Latexify
+
+A = Rational{Int}[
+    1  2  -1   -4
+    2  3  -1  -11
+    -2  0  -3   22
+]
+
+display(rref(A))
+```
+
+[能让它在 Quarto 输出的时候输出 LaTeX 吗？](../appendices/3.3.qmd#能让它在-quarto-输出的时候输出-latex-吗)
+
+[我在定义矩阵的时候直接用 Rationalize.是不是就可以了？](../appendices/3.3.qmd#我在定义矩阵的时候直接用-rationalize是不是就可以了)
+
+[使用 `Rational{Int}[]` 定义更清晰](../appendices/3.3.qmd#使用-rationalint-定义更清晰)
+
+```{julia}
+using Symbolics
+using Latexify
+
+@variables b1 b2 b3
+
+M = [
+    1  3  0  2  b1
+    0  0  1  4  b2
+    1  3  1  6  b3
+]
+
+R = copy(M)
+R[3, :] .-= R[1, :]
+R[3, :] .-= R[2, :]
+
+display(latexify(R))
+display((R))
+```
+
+```{julia}
+using RowEchelon, Latexify
+
+R = Rational{Int}[
+    1 3 0 2
+    0 0 1 4
+    0 0 0 0
+]
+xp = [1 0 6 0]'
+display(xp)
+
+display(R * xp)
+```
