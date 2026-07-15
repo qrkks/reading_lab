@@ -4,6 +4,7 @@ julia:
   env:
     - "JULIA_PYTHONCALL_EXE=@venv"
     - "JULIA_CONDAPKG_BACKEND=Null"
+    - "NO_COLOR=1"
 ---
 
 # 向量空间与子空间
