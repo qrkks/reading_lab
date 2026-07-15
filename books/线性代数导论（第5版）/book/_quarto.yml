@@ -15,6 +15,7 @@ book:
   appendices:
     - appendices/3.1.qmd
     - appendices/3.2.qmd
+    - appendices/3.3.qmd
 
 format:
   docx: default

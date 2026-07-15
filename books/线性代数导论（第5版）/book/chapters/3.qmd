@@ -294,7 +294,7 @@ for name, mat in matrix_list:
     print(f"秩 rank({name}) = {rank_val}\n")
 ```
 
-```python
+```{python}
 display("A1", A1)
 display("列空间", *A1.columnspace())
 display("行空间", *A1.rowspace())z
@@ -306,7 +306,7 @@ display("零空间", *A1.nullspace())
 
 [列空间和零空间](../appendices/4.md#列空间和零空间)
 
-```julia
+```{julia}
 using RowEchelon
 using Latexify
 
@@ -327,7 +327,7 @@ display(rref(A))
 
 ## Ax = b 的全解
 
-```julia
+```{julia}
 using RowEchelon
 using Latexify
 
