@@ -4,14 +4,14 @@
 
 先安装一次：
 
-```julia
+```{julia}
 using Pkg
 Pkg.add("Latexify")
 ```
 
 然后在 `.qmd` 中：
 
-````markdown
+````{markdown}
 ---
 title: "线性代数"
 format: html
@@ -50,7 +50,7 @@ $$
 
 也可以把它封装成你自己的函数：
 
-```julia
+```{julia}
 using RowEchelon
 using Latexify
 
@@ -63,13 +63,13 @@ end
 
 以后只写：
 
-```julia
+```{julia}
 show_rref(A)
 ```
 
 ### 隐藏代码，只显示公式
 
-```julia
+```{julia}
 #| echo: false
 
 show_rref(A)
@@ -77,7 +77,7 @@ show_rref(A)
 
 ### 查看原始 LaTeX 源码
 
-```julia
+```{julia}
 print(latexify(R))
 ```
 
@@ -85,7 +85,7 @@ print(latexify(R))
 
 所以你以后学习线性代数可以直接形成：
 
-```julia
+```
 A → rref(A) → latexify → Quarto 数学公式
 ```
 
@@ -97,13 +97,13 @@ A → rref(A) → latexify → Quarto 数学公式
 
 你这个矩阵的结果恰好全是整数，可以直接：
 
-```julia
+```{julia}
 Int.(rref(A))
 ```
 
 输出：
 
-```text
+```{text}
 3×4 Matrix{Int64}:
  1  0  0  -8
  0  1  0   1
@@ -112,13 +112,13 @@ Int.(rref(A))
 
 但遇到真正含分数的结果，例如：
 
-```julia
+```{julia}
 A = [2 1]
 ```
 
 它的 RREF 是：
 
-```text
+```{text}
 [1  1/2]
 ```
 
@@ -126,7 +126,7 @@ A = [2 1]
 
 学习线性代数时，更推荐写一个函数：**先用精确分数计算，结果全是整数时再显示整数，否则保留分数。**
 
-```julia
+```{julia}
 using RowEchelon
 
 function exact_rref(A)
@@ -142,13 +142,13 @@ end
 
 以后直接：
 
-```julia
+```{julia}
 exact_rref(A)
 ```
 
 你的矩阵会显示整数；出现分数时会显示：
 
-```text
+```{text}
 1//2
 ```
 
@@ -158,7 +158,7 @@ exact_rref(A)
 
 可以，写成 **小写的** `rationalize.`：
 
-```julia
+```{julia}
 A = rationalize.(
     [
         1  2  -1   -4
@@ -170,19 +170,19 @@ A = rationalize.(
 
 这里的点表示把 `rationalize` 应用到矩阵的每个元素。此时：
 
-```julia
+```{julia}
 eltype(A)
 ```
 
 会得到：
 
-```text
+```{text}
 Rational{Int64}
 ```
 
 再计算：
 
-```julia
+```{julia}
 R = rref(A)
 ```
 
@@ -190,7 +190,7 @@ R = rref(A)
 
 不过定义整数系数矩阵时，我更推荐直接指定类型，更简洁：
 
-```julia
+```{julia}
 A = Rational{Int}[
     1  2  -1   -4
     2  3  -1  -11
@@ -200,7 +200,7 @@ A = Rational{Int}[
 
 然后整个流程就是：
 
-```julia
+```{julia}
 using RowEchelon
 using Latexify
 
@@ -216,7 +216,7 @@ display(latexify(R))
 
 若矩阵里本来有小数，才更适合：
 
-```julia
+```{julia}
 A = rationalize.(
     [
         0.5  0.25
@@ -227,12 +227,11 @@ A = rationalize.(
 
 它会尽量恢复成 `1//2`、`1//4`、`3//4` 这类精确分数。Julia 的 `Rational` 类型本来就是用整数分子和分母保存精确比例的。
 
-
-
-
 # 使用 `Rational{Int}[]` 定义更清晰
+
 # `R[3, :] .-= R[1, :]` 是什么意思
-```julia
+
+```{julia}
 R[3, :] .-= R[1, :]
 ```
 
@@ -244,7 +243,7 @@ $$
 
 拆开看：
 
-```julia
+```{julia}
 R[3, :]
 ```
 
@@ -253,19 +252,19 @@ R[3, :]
 
 也就是取出矩阵的第 3 行。
 
-```julia
+```
 .-=
 ```
 
 表示逐元素相减，并把结果写回左边。等价于：
 
-```julia
+```{julia}
 R[3, :] .= R[3, :] .- R[1, :]
 ```
 
 更直白地写，就是对每一列执行：
 
-```julia
+```{julia}
 for j in axes(R, 2)
     R[3, j] = R[3, j] - R[1, j]
 end
@@ -289,7 +288,7 @@ $$
 
 执行：
 
-```julia
+```{julia}
 R[3, :] .-= R[1, :]
 ```
 
@@ -304,7 +303,7 @@ $$
 
 接着：
 
-```julia
+```{julia}
 R[3, :] .-= R[2, :]
 ```
 
@@ -324,10 +323,276 @@ $$
 
 外面的：
 
-```julia
+```{julia}
 @views begin
-    ...
+    nothing
 end
 ```
 
 会让 `R[3, :]` 尽量作为原矩阵的“窗口”使用，而不是复制出一条新向量，效率更高。
+
+# 是不是说 $x_p$ 是在 $x_n = 0$ 的时候算出来的？所以 $A x_p = b$ $n - r$ 个 $x_n$ 满足 $A x_n = 0$ 啊
+
+对，你抓到核心了，但要把两个层次分开。
+
+对于非齐次方程
+
+$$
+A x=b
+$$
+
+通解写成
+
+$$
+x=x_p+x_n
+$$
+
+其中：
+
+- \(x_p\) 是一个特解，满足
+
+$$
+A x_p=b
+$$
+
+- \(x_n\) 是零空间中的任意向量，满足
+
+$$
+A x_n=0
+$$
+
+因此
+
+$$
+A(x_p+x_n)=A x_p+A x_n=b+0=b
+$$
+
+## \(x_p\) 是不是令 \(x_n=0\) 算出来的？
+
+可以这样理解：
+
+$$
+x=x_p+x_n
+$$
+
+当令
+
+$$
+x_n=0
+$$
+
+时，就得到
+
+$$
+x=x_p
+$$
+
+所以 \(x_p\) 是通解里“零空间部分取零”时得到的那个解。
+
+在实际消元计算中，通常表现为：**把所有自由变量设为 \(0\)，求出一个最方便的特解 \(x_p\)**。
+
+不过要注意，\(x_p\) 不唯一。因为只要 \(x_p\) 是一个特解，那么
+
+$$
+x_p+x_n
+$$
+
+也是 \(A x=b\) 的解。
+
+例如：
+
+$$
+x_p=
+\begin{bmatrix}
+1\\
+2
+\end{bmatrix},
+\qquad
+x_n=c
+\begin{bmatrix}
+3\\
+-1
+\end{bmatrix}
+$$
+
+那么所有解就是
+
+$$
+x=
+\begin{bmatrix}
+1\\
+2
+\end{bmatrix}
++c
+\begin{bmatrix}
+3\\
+-1
+\end{bmatrix}
+$$
+
+当 \(c=0\)，也就是 \(x_n=0\) 时，得到特解 \(x_p\)。
+
+而“\(n-r\) 个特殊解”指的是零空间的一组基：
+
+$$
+s_1,s_2,\dots,s_{n-r}
+$$
+
+任意零空间向量都可以写成
+
+$$
+x_n=c_1s_1+c_2s_2+\cdots+c_{n-r}s_{n-r}
+$$
+
+所以完整通解是
+
+$$
+x=x_p+c_1s_1+\cdots+c_{n-r}s_{n-r}
+$$
+
+一句话概括：**先把自由变量全设为 \(0\)，得到一个特解 \(x_p\)；再把零空间的所有可能变化 \(x_n\) 加回去。**
+
+# 那 julia 有能算书的特解的函数吗？
+
+有，但 **Julia 标准库和 `RowEchelon.jl` 没有直接叫“特解”的现成函数**。最贴近书上做法的是：
+
+1. 对增广矩阵做 `rref`
+2. 把所有自由变量设为 \(0\)
+3. 读取主元变量
+
+`A \ b` 不是这个含义；它对矩形矩阵返回最小范数最小二乘解。
+
+你的例子可以这样算：
+
+```{julia}
+using RowEchelon
+
+A = Rational{Int}[
+    1 3 0 2
+    0 0 1 4
+    1 3 1 6
+]
+
+b = Rational{Int}[1, 6, 7]
+
+R = rref(hcat(A, b))
+display(R)
+```
+
+得到：
+
+```{text}
+1  3  0  2  │ 1
+0  0  1  4  │ 6
+0  0  0  0  │ 0
+```
+
+主元变量是 \(x_1,x_3\)，自由变量是 \(x_2,x_4\)。令
+
+$$
+x_2=x_4=0
+$$
+
+便有：
+
+```{julia}
+xp = Rational{Int}[
+    R[1, end],
+    0,
+    R[2, end],
+    0,
+]
+```
+
+结果：
+
+```{text}
+4-element Vector{Rational{Int64}}:
+ 1//1
+ 0//1
+ 6//1
+ 0//1
+```
+
+也就是：
+
+$$
+x_p=
+\begin{bmatrix}
+1\\
+0\\
+6\\
+0
+\end{bmatrix}
+$$
+
+验证：
+
+```{julia}
+A * xp == b
+# true
+```
+
+## 可以写成通用函数
+
+这样以后任何矩阵都可以直接算“书上的特解”：
+
+```{julia}
+using RowEchelon
+
+function particular_solution(A, b)
+    m, n = size(A)
+    length(b) == m || throw(DimensionMismatch("length(b) must equal size(A, 1)"))
+
+    R = rref(hcat(A, b))
+    xp = zeros(eltype(R), n)
+
+    for i in 1:m
+        # 找这一行在系数矩阵部分的第一个非零元素，也就是主元
+        pivot = findfirst(x -> !iszero(x), @view R[i, 1:n])
+
+        if pivot === nothing
+            # 形如 0 = 非零数，说明方程无解
+            if !iszero(R[i, end])
+                error("方程组无解")
+            end
+        else
+            # 自由变量均取 0，所以主元变量等于增广列中的常数
+            xp[pivot] = R[i, end]
+        end
+    end
+
+    return xp
+end
+```
+
+使用：
+
+```{julia}
+xp = particular_solution(A, b)
+display(xp)
+```
+
+输出：
+
+```{text}
+4-element Vector{Rational{Int64}}:
+ 1//1
+ 0//1
+ 6//1
+ 0//1
+```
+
+所以可以记成：
+
+```{julia}
+A \ b
+```
+
+求的是偏数值计算意义的解；而：
+
+```{julia}
+particular_solution(A, b)
+```
+
+求的是书上所说的、**自由变量全部取 \(0\)** 的那个方便的特解。
