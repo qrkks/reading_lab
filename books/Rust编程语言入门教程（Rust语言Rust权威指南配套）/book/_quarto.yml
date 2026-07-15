@@ -10,10 +10,12 @@ book:
     - chapters/3.md
     - chapters/4.md
     - chapters/5.md
+    - chapters/6.md
   appendices:
     - appendices/3.md
     - appendices/4.md
     - appendices/5.md
+    - appendices/6.md
 
 format:
   html: default
