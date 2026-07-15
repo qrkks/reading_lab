@@ -1,0 +1,18 @@
+project:
+  type: book
+
+book:
+  title: "【无废话 30 分钟】Lua 快速入门教程 - 4K 超清"
+  author: "Up：每日喝粥"
+  date: "2026/7/15"
+  chapters:
+    - index.qmd
+    - chapters/1.md
+  appendices:
+    - appendices/1.md
+
+format:
+  html:
+    theme:
+      - cosmo
+      - brand
