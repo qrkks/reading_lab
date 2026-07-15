@@ -136,6 +136,9 @@ jobs:
               # Julia notebook workers start with --project=@. and search
               # upward from each QMD file inside the temporary render tree.
               cp Project.toml Manifest.toml "$render_dir/"
+              # PythonCall's @venv resolves from the active Julia project.
+              # Reuse the uv-managed environment instead of copying it.
+              ln -s "$GITHUB_WORKSPACE/.venv" "$render_dir/.venv"
               html_metadata="$render_dir/_metadata.yml"
               cp _quarto-html.yml "$html_metadata"
               book_number_depth="$(awk '/^number-depth:[[:space:]]*/ { print $2; exit }' "$config")"
