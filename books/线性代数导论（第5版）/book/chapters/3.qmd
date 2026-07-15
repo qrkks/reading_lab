@@ -306,3 +306,36 @@ display("零空间", *A1.nullspace())
 
 [列空间和零空间](../appendices/4.md#列空间和零空间)
 
+```julia
+using RowEchelon
+using Latexify
+
+A = Rational{Int}[
+    1  2  -1   -4
+    2  3  -1  -11
+    -2  0  -3   22
+]
+
+display(rref(A))
+```
+
+[能让它在 Quarto 输出的时候输出 LaTeX 吗？](../appendices/3.3.qmd#能让它在-quarto-输出的时候输出-latex-吗)
+
+[我在定义矩阵的时候直接用 Rationalize.是不是就可以了？](../appendices/3.3.qmd#我在定义矩阵的时候直接用-rationalize是不是就可以了)
+
+[使用 `Rational{Int}[]` 定义更清晰](../appendices/3.3.qmd#使用-rationalint-定义更清晰)
+
+## Ax = b 的全解
+
+```julia
+using RowEchelon
+using Latexify
+
+aug = Rational{Int}[
+    1 3 0 2 1
+    0 0 1 4 6
+    1 3 1 6 7
+]
+
+display(latexify(rref(aug)))
+```

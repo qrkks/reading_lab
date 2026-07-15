@@ -1,0 +1,230 @@
+# 能让它在 Quarto 输出的时候输出 LaTeX 吗？
+
+可以，而且很适合。给 Julia 装 `Latexify.jl`，把矩阵结果转换成 LaTeX，再让 Quarto/Jupyter 以富文本形式显示即可。`Latexify.jl` 能直接处理矩阵、有理数和表达式；Quarto 的 Julia 代码块通过 Jupyter 执行，能够接收这种富输出。
+
+先安装一次：
+
+```julia
+using Pkg
+Pkg.add("Latexify")
+```
+
+然后在 `.qmd` 中：
+
+````markdown
+---
+title: "线性代数"
+format: html
+jupyter: julia-1.12
+---
+
+```{julia}
+#| echo: true
+
+using RowEchelon
+using Latexify
+
+A = Rational{Int}[
+     1  2  -1   -4
+     2  3  -1  -11
+    -2  0  -3   22
+]
+
+R = rref(A)
+
+display(latexify(R))
+```
+````
+
+Quarto 输出时会把结果排成真正的数学矩阵，而不是普通终端文本：
+
+$$
+\begin{bmatrix}
+1 & 0 & 0 & -8 \\
+0 & 1 & 0 & 1 \\
+0 & 0 & 1 & -2
+\end{bmatrix}
+$$
+
+`display()` 是显式要求 Jupyter 使用最丰富的可用格式显示对象；Quarto 官方也建议在 Julia 单元中需要明确显示输出时调用它。
+
+也可以把它封装成你自己的函数：
+
+```julia
+using RowEchelon
+using Latexify
+
+function show_rref(A)
+    R = rref(Rational{Int}.(A))
+    display(latexify(R))
+    return nothing
+end
+```
+
+以后只写：
+
+```julia
+show_rref(A)
+```
+
+### 隐藏代码，只显示公式
+
+```julia
+#| echo: false
+
+show_rref(A)
+```
+
+### 查看原始 LaTeX 源码
+
+```julia
+print(latexify(R))
+```
+
+`display(latexify(R))` 会渲染公式，`print(latexify(R))` 则输出可复制的 LaTeX 文本。
+
+所以你以后学习线性代数可以直接形成：
+
+```julia
+A → rref(A) → latexify → Quarto 数学公式
+```
+
+这比 SymPy 那套 `display(Markdown(... latex(...)))` 确实自然不少。
+
+# 能让它默认输出整数吗？
+
+可以，但 **RowEchelon.jl 本身不能设置成始终输出整数**。它会主动把整数矩阵转换成 `Float64`；只有有理数输入会保持精确类型。因为整数矩阵的 RREF 也可能出现分数，不一定能用整数表示。
+
+你这个矩阵的结果恰好全是整数，可以直接：
+
+```julia
+Int.(rref(A))
+```
+
+输出：
+
+```text
+3×4 Matrix{Int64}:
+ 1  0  0  -8
+ 0  1  0   1
+ 0  0  1  -2
+```
+
+但遇到真正含分数的结果，例如：
+
+```julia
+A = [2 1]
+```
+
+它的 RREF 是：
+
+```text
+[1  1/2]
+```
+
+就不可能转换成纯整数。
+
+学习线性代数时，更推荐写一个函数：**先用精确分数计算，结果全是整数时再显示整数，否则保留分数。**
+
+```julia
+using RowEchelon
+
+function exact_rref(A)
+    R = rref(Rational{Int}.(A))
+
+    if all(denominator.(R) .== 1)
+        return Int.(R)
+    end
+
+    return R
+end
+```
+
+以后直接：
+
+```julia
+exact_rref(A)
+```
+
+你的矩阵会显示整数；出现分数时会显示：
+
+```text
+1//2
+```
+
+而不是浮点小数。这种最适合拿 Julia 当线性代数草稿纸。
+
+# 我在定义矩阵的时候直接用 Rationalize.是不是就可以了？
+
+可以，写成 **小写的** `rationalize.`：
+
+```julia
+A = rationalize.(
+    [
+        1  2  -1   -4
+        2  3  -1  -11
+        -2  0  -3   22
+    ]
+)
+```
+
+这里的点表示把 `rationalize` 应用到矩阵的每个元素。此时：
+
+```julia
+eltype(A)
+```
+
+会得到：
+
+```text
+Rational{Int64}
+```
+
+再计算：
+
+```julia
+R = rref(A)
+```
+
+结果就会保持精确的整数或分数，不再变成 `Float64`。`rationalize` 对整数会生成分母为 \(1\) 的有理数；对浮点数则会寻找指定误差范围内的有理数近似。
+
+不过定义整数系数矩阵时，我更推荐直接指定类型，更简洁：
+
+```julia
+A = Rational{Int}[
+    1  2  -1   -4
+    2  3  -1  -11
+    -2  0  -3   22
+]
+```
+
+然后整个流程就是：
+
+```julia
+using RowEchelon
+using Latexify
+
+A = Rational{Int}[
+    1  2  -1   -4
+    2  3  -1  -11
+    -2  0  -3   22
+]
+
+R = rref(A)
+display(latexify(R))
+```
+
+若矩阵里本来有小数，才更适合：
+
+```julia
+A = rationalize.(
+    [
+        0.5  0.25
+        1.0  0.75
+    ]
+)
+```
+
+它会尽量恢复成 `1//2`、`1//4`、`3//4` 这类精确分数。Julia 的 `Rational` 类型本来就是用整数分子和分母保存精确比例的。
+
+# 使用 `Rational{Int}[]` 定义更清晰
