@@ -40,8 +40,10 @@ def display(*objects):
             print(obj._repr_latex_())
         elif isinstance(obj, (list, tuple)):
             display(*obj)
+            continue
         else:
             print(obj)
+        print()
 
 A = sp.Matrix([
     [1, 0],
