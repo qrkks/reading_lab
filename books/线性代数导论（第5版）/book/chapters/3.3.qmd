@@ -69,8 +69,11 @@ A = [
 ]
 b = [1 6 7]'
 
-display(latexify(A))
+xp =
+
+    display(latexify(A))
 display(latexify(A \ b)) # 这不是求特解，是1范数的最小二乘
+display(xp)
 ```
 
 [那 julia 有能算书的特解的函数吗？](../appendices/3.3.qmd#那-julia-有能算书的特解的函数吗)
