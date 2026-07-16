@@ -32,7 +32,7 @@ R = rref(A)
 
 先安装一次：
 
-```{julia}
+```julia
 using Pkg
 Pkg.add("Latexify")
 ```
@@ -1665,14 +1665,14 @@ $$
 
 所以常见命名习惯：
 
-| 符号    | 含义                                       |
-| ------- | ------------------------------------------ |
-| \(A\)   | 原始矩阵、系数矩阵                         |
-| \(B,C\) | 其他矩阵                                   |
-| \(M\)   | 某个矩阵（经常用于增广矩阵）               |
-| \(R\)   | row echelon / reduced row echelon 后的矩阵 |
-| \(U\)   | 上三角矩阵（upper triangular）             |
-| \(L\)   | 下三角矩阵（lower triangular）             |
+  | 符号    | 含义                                       |
+  | ------- | ------------------------------------------ |
+  | \(A\)   | 原始矩阵、系数矩阵                         |
+  | \(B,C\) | 其他矩阵                                   |
+  | \(M\)   | 某个矩阵（经常用于增广矩阵）               |
+  | \(R\)   | row echelon / reduced row echelon 后的矩阵 |
+  | \(U\)   | 上三角矩阵（upper triangular）             |
+  | \(L\)   | 下三角矩阵（lower triangular）             |
 
 ---
 
@@ -2250,7 +2250,9 @@ xn = solution - xp
 这里：
 
 - `solution`：完整通解 \(\mathbf{x}\)
+
 - `xp`：常数部分，也就是一个特解
+
 - `xn`：所有含 \(\tau\) 的部分，也就是零空间中的一般解
   # xn 的意义是什么，就是自由列线性组合成 0，相互抵消的解？
   对，**你可以把 \(\mathbf{x}\_n\) 理解为“一组让 \(A\) 的各列线性组合后相互抵消为零的系数”**。
@@ -2554,10 +2556,10 @@ $$
 
 所以两个空间其实研究的是两个相反的问题：
 
-|        | 问题             | 看什么   |
-| ------ | ---------------- | -------- |
-| 列空间 | 矩阵能产生什么？ | 有效信息 |
-| 零空间 | 矩阵丢失了什么？ | 冗余关系 |
+  |        | 问题             | 看什么   |
+  | ------ | ---------------- | -------- |
+  | 列空间 | 矩阵能产生什么？ | 有效信息 |
+  | 零空间 | 矩阵丢失了什么？ | 冗余关系 |
 
 更抽象一点：
 
@@ -2696,11 +2698,11 @@ x = A.inv() * b
 
 所以对应关系：
 
-| 数学          | Julia    | SymPy                     |
-| ------------- | -------- | ------------------------- |
-| 求解 \(Ax=b\) | `A \ b`  | `A.LUsolve(b)`            |
-| 高斯约旦求解  | —        | `A.gauss_jordan_solve(b)` |
-| 求逆          | `inv(A)` | `A.inv()`                 |
+  | 数学          | Julia    | SymPy                     |
+  | ------------- | -------- | ------------------------- |
+  | 求解 \(Ax=b\) | `A \ b`  | `A.LUsolve(b)`            |
+  | 高斯约旦求解  | —        | `A.gauss_jordan_solve(b)` |
+  | 求逆          | `inv(A)` | `A.inv()`                 |
 
 对于你现在学 Strang 的线性代数，我更推荐：
 
@@ -2764,11 +2766,11 @@ Ab = Matrix.hstack(A, b)
 
 对应关系：
 
-| 操作     | Julia       | SymPy                |
-| -------- | ----------- | -------------------- |
-| 横向拼接 | `[A b]`     | `A.row_join(b)`      |
-| 横向拼接 | `hcat(A,b)` | `Matrix.hstack(A,b)` |
-| 纵向拼接 | `[A;B]`     | `A.col_join(B)`      |
+  | 操作     | Julia       | SymPy                |
+  | -------- | ----------- | -------------------- |
+  | 横向拼接 | `[A b]`     | `A.row_join(b)`      |
+  | 横向拼接 | `hcat(A,b)` | `Matrix.hstack(A,b)` |
+  | 纵向拼接 | `[A;B]`     | `A.col_join(B)`      |
 
 ---
 
@@ -3391,8 +3393,8 @@ $$
 
 也就是：
 
-> \(x_p\) 是找到一个能产生 \(b\) 的方案；  
-> \(x_n\) 是所有不会改变结果的调整方案。  
+> \(x_p\) 是找到一个能产生 \(b\) 的方案；
+> \(x_n\) 是所有不会改变结果的调整方案。
 > 两者相加就是全部解。
 
 # xn 就是消掉了常数项，全部是齐次的
@@ -3896,6 +3898,7 @@ $$
 真正唯一的是：
 
 - 零空间为零时，整个解唯一；
+
 - 有自由变量时，特解有无穷多个。
   # 我理解这些有什么用
   这个问题问得非常好，因为你已经开始问“为什么学这个”，而不是只记步骤了。
@@ -4677,6 +4680,135 @@ $$
 
 所以后面几节不是推翻现在的理解，而是在这个骨架上继续加东西。你现在读 3.3，正好是进入“空间观点”的入口。
 
+# `ValueError: Linear system has no solution`
+
+这个错误不是代码格式问题，而是说明方程组
+
+$$
+Ax=b
+$$
+
+**没有解**。
+
+判断标准是：
+
+$$
+\operatorname{rank}(A)\neq \operatorname{rank}([A\mid b])
+$$
+
+你可以直接检查：
+
+```{python}
+#| output: asis
+
+from sympy import Matrix, symbols
+from IPython.display import display, Markdown
+
+b1, b2, b3 = symbols("b1,b2,b3")
+
+A = Matrix([
+    [1, 1],
+    [1, 2],
+    [-2, -3],
+])
+b = Matrix([b1, b2, b3])
+
+M = A.row_join(b)
+
+display(A)
+display(b)
+display(M.rref()[0])
+
+print("rank(A) =", A.rank())
+print("rank([A|b]) =", M.rank())
+```
+
+如果增广矩阵的行最简形出现这种行：
+
+$$
+\begin{bmatrix}
+0 & 0 & \cdots & 0 & c
+\end{bmatrix},
+\qquad c\neq 0
+$$
+
+它对应的方程就是：
+
+$$
+0=c
+$$
+
+产生矛盾，所以无解。
+
+例如：
+
+```python
+A = Matrix([
+    [1, 1],
+    [2, 2],
+])
+
+b = Matrix([
+    [1],
+    [3],
+])
+```
+
+增广矩阵为：
+
+```python
+M = A.row_join(b)
+display(M.rref()[0])
+```
+
+结果相当于：
+
+$$
+\begin{bmatrix}
+1 & 1 & 0\\
+0 & 0 & 1
+\end{bmatrix}
+$$
+
+最后一行表示 \(0=1\)，因此：
+
+```python
+A.gauss_jordan_solve(b)
+```
+
+就会报：
+
+```text
+ValueError: Linear system has no solution
+```
+
+你还可以避免程序直接中断：
+
+```python
+try:
+    solution, parameters = A.gauss_jordan_solve(b)
+    display(solution, parameters)
+except ValueError:
+    print("方程 Ax = b 无解")
+    display(A.row_join(b).rref()[0])
+```
+
+这里和你刚学的列空间正好串起来：
+
+$$
+Ax=b\text{ 有解}
+\iff
+b\in C(A)
+$$
+
+现在报错就意味着：
+
+$$
+b\notin C(A)
+$$
+
+也就是 \(A\) 的列向量无论怎样线性组合，都无法得到这个 \(b\)。
+
 # 我感觉手算部分很适合用 julia，自动部分还是 sympy 爽
 
 你的感觉其实很准确，这两个工具的定位刚好有点互补。
@@ -4850,3 +4982,713 @@ svd(A)
 Julia 的体验会明显提升，因为那些本质上就是数值线性代数。
 
 而你现在第三章刚好是符号结构占比高，所以 SymPy 会让你感觉特别爽。你这个工具分工判断基本是对的。
+
+# julia 怎么定义符号？
+
+Julia 里“符号”有两种意思，别混了。
+
+## 1. 定义数学上的符号变量
+
+用 `Symbolics.jl`：
+
+```julia
+using Symbolics
+
+@variables x y z
+```
+
+现在 `x`、`y`、`z` 就是符号变量：
+
+```julia
+expr = x^2 + 2x * y + y^2
+```
+
+也可以定义带下标的一组变量：
+
+```julia
+@variables x[1:3]
+```
+
+得到：
+
+```julia
+x[1]
+x[2]
+x[3]
+```
+
+定义符号向量可以写：
+
+```julia
+@variables x[1:3]
+
+v = collect(x)
+```
+
+或者：
+
+```julia
+@variables x₁ x₂ x₃
+
+v = [x₁, x₂, x₃]
+```
+
+注意 Julia 支持隐式数字乘法：
+
+```julia
+2x
+3x * y
+```
+
+但变量之间必须写乘号：
+
+```julia
+x * y
+```
+
+不能写 `xy`，因为那会被当成一个名为 `xy` 的变量。
+
+---
+
+## 2. 使用 SymPy.jl 定义符号
+
+如果你用的是 Julia 的 `SymPy.jl`：
+
+```julia
+using SymPy
+
+@syms x y z
+```
+
+然后：
+
+```julia
+expr = x^2 + 2x * y + y^2
+```
+
+符号向量：
+
+```julia
+@syms x₁ x₂ x₃
+
+v = [x₁, x₂, x₃]
+```
+
+或者：
+
+```julia
+x = symbols("x1:4")
+```
+
+不过这里得到的通常是 Python/SymPy 风格的符号序列。
+
+---
+
+## 3. Julia 自带的 `Symbol`
+
+Julia 本身还有一种 `Symbol`：
+
+```julia
+s = :x
+```
+
+或者：
+
+```julia
+s = Symbol("x")
+```
+
+但它不是数学符号变量，不能做：
+
+```julia
+s^2 + 1
+```
+
+`:x` 更像“变量名本身”，常用于元编程、列名、字段名等。
+
+所以你现在做线性代数符号运算，推荐：
+
+```julia
+using Symbolics
+
+@variables x₁ x₂ x₃
+x = [x₁, x₂, x₃]
+```
+
+这就相当于 SymPy 中：
+
+```python
+x1, x2, x3 = symbols("x1 x2 x3")
+x = Matrix([x1, x2, x3])
+```
+
+# julia 的 display() 是哪个包的？它能传可变参数吗？
+
+`display()` 是 **Julia 标准库 Base 里的函数**，不需要安装或 `using` 任何包。
+
+更准确地说，它属于：
+
+```julia
+Base.Multimedia.display
+```
+
+直接就能用：
+
+```julia
+A = [1 2; 3 4]
+
+display(A)
+```
+
+## 它不能像 IPython 那样传多个对象
+
+Julia 的 `display` **不是可变参数函数**。下面这种写法通常不成立：
+
+```julia
+display(A, b)
+```
+
+因为两个参数会被解释为某个特殊方法，例如：
+
+```julia
+display(display_backend, object)
+```
+
+第一个参数不是“第一个要显示的对象”。
+
+所以显示多个对象应当写：
+
+```julia
+display(A)
+display(b)
+```
+
+或者：
+
+```julia
+foreach(display, (A, b))
+```
+
+也可以自己定义一个可变参数版本：
+
+```julia
+displayall(xs...) = foreach(display, xs)
+
+displayall(A, b)
+```
+
+## `display((A, b))` 的区别
+
+你也可以写：
+
+```julia
+display((A, b))
+```
+
+但它会把 `(A, b)` 当成一个**元组对象**整体显示，而不是依次显示两个对象。
+
+在 Notebook 里更推荐：
+
+```julia
+display(A)
+display(b)
+```
+
+或者使用自定义函数：
+
+```julia
+displayall(xs...) = foreach(display, xs)
+```
+
+所以它与 Python 的：
+
+```python
+display(A, b)
+```
+
+不完全一样。Julia 原生 `display` 一次主要显示一个对象。
+
+# 感觉 julia 不是很面向对象，它更多是函数而不是方法，好像 R 一样
+
+对，你这个感觉很准确。Julia **不是传统的面向对象语言**，它更接近：
+
+> 数据归数据，函数归函数，再通过多重派发决定调用哪个函数实现。
+
+例如 Python 里常写：
+
+```python
+A.rank()
+A.transpose()
+```
+
+方法“挂”在对象 `A` 上。
+
+Julia 通常写：
+
+```julia
+rank(A)
+transpose(A)
+```
+
+看起来更像 R：
+
+```r
+rankMatrix(A)
+t(A)
+```
+
+## 但 Julia 其实也有“方法”
+
+只是 Julia 的方法不属于某个类，而是属于一个**泛型函数**。
+
+例如：
+
+```julia
+function area(r::Rectangle)
+    return r.width * r.height
+end
+
+function area(c::Circle)
+    return π * c.radius^2
+end
+```
+
+这里：
+
+- `area` 是泛型函数
+- `area(::Rectangle)` 是一个方法
+- `area(::Circle)` 是另一个方法
+
+调用：
+
+```julia
+area(rectangle)
+area(circle)
+```
+
+Julia 会根据参数类型自动选择对应方法。这就是 **多重派发**。
+
+而且不只看第一个参数：
+
+```julia
+interact(x::Dog, y::Cat) = "狗追猫"
+interact(x::Cat, y::Dog) = "猫躲狗"
+interact(x::Dog, y::Dog) = "狗和狗玩"
+```
+
+它会同时根据 `x` 和 `y` 的类型选择实现。
+
+传统面向对象通常更偏向：
+
+```python
+dog.interact(cat)
+```
+
+主要由 `dog` 的类型决定先去哪里找方法；Julia 则是：
+
+```julia
+interact(dog, cat)
+```
+
+平等地考虑所有参数。
+
+## Julia 有结构体，但通常不往上面“挂方法”
+
+```julia
+struct User
+    name::String
+    age::Int
+end
+```
+
+然后定义函数：
+
+```julia
+greet(user::User) = "你好，$(user.name)"
+```
+
+而不是 Python 那种：
+
+```python
+class User:
+    def greet(self): ...
+```
+
+所以 Julia 的组织方式通常是：
+
+```julia
+数据类型：User
+操作函数：greet(user)
+```
+
+而不是：
+
+```text
+User 对象拥有 greet 方法
+```
+
+## 和 R 的确很像，但 Julia 更系统
+
+R 也经常写：
+
+```r
+print(x)
+summary(x)
+plot(x)
+```
+
+然后根据 `x` 的类别选择实现。
+
+Julia 与它相似的地方是：
+
+- 函数优先
+- 数据和操作分离
+- 根据类型派发
+- 常写 `f(x)` 而非 `x.f()`
+
+但 Julia 的类型系统和多重派发更核心、更统一。R 的 S3 通常主要根据第一个参数的类派发；Julia 可以根据所有参数的类型派发。
+
+## `A.method()` 在 Julia 中有一点语法糖
+
+Julia 现在可以写某些点调用形式：
+
+```julia
+A |> rank
+```
+
+以及函数组合、管道，但传统的：
+
+```julia
+A.rank()
+```
+
+并不是 Julia 的主要设计思路。
+
+不过广播运算中的点又是另一回事：
+
+```julia
+sin.(x)
+x .+ 1
+```
+
+这里的 `.` 表示逐元素广播，不是对象方法。
+
+所以可以把 Julia 理解成：
+
+> 它有类型、有封装、有抽象，也有“方法”，但不是以类和对象为中心，而是以泛型函数与多重派发为中心。
+
+你觉得它像 R，主要正是因为两者都偏好：
+
+```julia
+操作(数据)
+```
+
+而不是：
+
+```python
+数据.操作()
+```
+
+不过 Julia 比 R 更像是把这种“函数式数据处理风格”做成了一套严格、可编译、高性能的类型派发系统。
+
+# 这不解出来了吗？为什么 gauss jordan solve 说没解呢？
+
+你这里**还没有把 (x) 解出来**，而是解出了 **(Ax=b) 有解时，(b) 必须满足的条件**。
+
+你的行变换最后得到：
+
+$$
+\left[
+\begin{array}{cc|c}
+1 & 1 & b_1\
+0 & 1 & b_2-b_1\
+0 & 0 & b_1+b_2+b_3
+\end{array}
+\right]
+$$
+
+最后一行表示：
+
+$$
+0=b_1+b_2+b_3
+$$
+
+所以不是任意 (b_1,b_2,b_3) 都有解，而是必须满足：
+
+$$
+b_1+b_2+b_3=0
+$$
+
+## 为什么 `gauss_jordan_solve` 报无解
+
+你在 SymPy 里定义的：
+
+```python
+b1, b2, b3 = symbols("b1 b2 b3")
+b = Matrix([b1, b2, b3])
+```
+
+其中 (b_1,b_2,b_3) 被看作三个相互独立的符号。
+
+SymPy 看到最后一行是：
+
+$$
+0=b_1+b_2+b_3
+$$
+
+但它不知道这个表达式等于零。对一般的、任意的 (b_1,b_2,b_3)，它通常不等于零，因此 SymPy 按照“一般情况”判断：
+
+```text
+Linear system has no solution
+```
+
+`gauss_jordan_solve` 的任务是：
+
+> 给定一个已经确定的 (b)，求 (x)。
+
+它不会自动返回这种形式：
+
+> 当 (b_1+b_2+b_3=0) 时有解，否则无解。
+
+## 加上有解条件之后就能求
+
+把
+
+$$
+b_3=-b_1-b_2
+$$
+
+代入：
+
+```{python}
+import sympy as sp
+
+b1, b2 = sp.symbols("b1 b2")
+
+A = sp.Matrix([
+    [1, 1],
+    [1, 2],
+    [-2, -3],
+])
+
+b = sp.Matrix([
+    b1,
+    b2,
+    -b1 - b2,
+])
+
+solution, parameters = A.gauss_jordan_solve(b)
+
+display(solution)
+display(parameters)
+```
+
+会得到：
+
+$$
+x=
+\begin{bmatrix}
+2b_1-b_2\
+b_2-b_1
+\end{bmatrix}
+$$
+
+因为前两行给出：
+
+$$
+x_1+x_2=b_1
+$$
+
+$$
+x_1+2x_2=b_2
+$$
+
+相减得到：
+
+$$
+x_2=b_2-b_1
+$$
+
+再代回：
+
+$$
+x_1=b_1-x_2
+=2b_1-b_2
+$$
+
+第三个方程只有在 (b_1+b_2+b_3=0) 时才与前两个一致。
+
+## 用具体数字看得最清楚
+
+满足条件的 (b)：
+
+```python
+b = sp.Matrix([1, 2, -3])
+A.gauss_jordan_solve(b)
+```
+
+因为：
+
+$$
+1+2-3=0
+$$
+
+所以有解：
+
+$$
+x=
+\begin{bmatrix}
+0\
+1
+\end{bmatrix}
+$$
+
+不满足条件的 (b)：
+
+```python
+b = sp.Matrix([1, 2, 3])
+A.gauss_jordan_solve(b)
+```
+
+因为：
+
+$$
+1+2+3\neq0
+$$
+
+所以无解。
+
+因此，你刚才通过行变换真正解出来的是：
+
+$$
+Ax=b\text{ 有解}
+\iff
+b_1+b_2+b_3=0
+$$
+
+在这个条件成立后，才进一步有：
+
+$$
+x=
+\begin{bmatrix}
+2b_1-b_2\
+b_2-b_1
+\end{bmatrix}
+$$
+
+这正是 (b\in C(A)) 的条件：这个矩阵的列空间不是整个 (\mathbb R^3)，而是平面
+
+$$
+C(A)=
+\left{
+b\in\mathbb R^3:
+b_1+b_2+b_3=0
+\right}.
+$$
+
+# n sp 和 julia 分别怎么取
+
+你是问矩阵里的 (n)（列数）吧。
+
+### SymPy
+
+```python
+m, n = A.shape
+```
+
+或者单独取：
+
+```python
+m = A.rows  # 行数
+n = A.cols  # 列数
+```
+
+### Julia
+
+```julia
+m, n = size(A)
+```
+
+或者单独取：
+
+```julia
+m = size(A, 1)   # 行数
+n = size(A, 2)   # 列数
+```
+
+所以最对应的写法是：
+
+```python
+# SymPy
+m, n = A.shape
+```
+
+```julia
+# Julia
+m, n = size(A)
+```
+
+向量长度则分别是：
+
+```python
+len(v)  # SymPy / Python
+```
+
+```julia
+length(v)    # Julia
+```
+
+# 秩就相当于有信息的列的数量？
+
+可以这样理解：**秩就是矩阵中“独立信息”的列数**。
+
+更准确地说：
+
+$$
+\operatorname{rank}(A)
+=
+\text{线性无关列的最大数量}
+=
+\dim C(A)
+$$
+
+例如：
+
+$$
+A=
+\begin{bmatrix}
+1&2&3\\
+2&4&6
+\end{bmatrix}
+$$
+
+三列分别是：
+
+$$
+a_1=
+\begin{bmatrix}
+1\\2
+\end{bmatrix},
+\qquad
+a_2=2a_1,
+\qquad
+a_3=3a_1
+$$
+
+虽然有三列，但后两列都只是第一列的倍数，没有带来新的方向，所以只有 **1 份独立信息**：
+
+$$
+\operatorname{rank}(A)=1
+$$
+
+因此，更合适的说法是：
+
+> **秩不是“非空列”的数量，而是不能由其他列线性组合出来的独立列的数量。**
+
+做行消元后，它也等于：
+
+- 主元列的数量
+- 主元的数量
+- 列空间的维数
+
+不过要注意，**原矩阵中的主元列**代表独立信息；不是说其他列完全没信息，而是它们提供的是已经存在的**重复或冗余信息**。
