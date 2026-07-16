@@ -1,3 +1,16 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
 ```{julia}
 #| echo: false
 
@@ -346,7 +359,7 @@ end
 
 会让 `R[3, :]` 尽量作为原矩阵的“窗口”使用，而不是复制出一条新向量，效率更高。
 
-# 是不是说 $x_p$ 是在 $x_n = 0$ 的时候算出来的？所以 $A x_p = b$ $n - r$ 个 $x_n$ 满足 $A x_n = 0$ 啊
+# 是不是说 $x_p$ 是在 $x_n = 0$ 的时候算出来的？所以 $A x_p = b$，$n - r$ 个 $x_n$ 满足 $A x_n = 0$ 啊
 
 对，你抓到核心了，但要把两个层次分开。
 
@@ -862,38 +875,2220 @@ b = [1 6 7]'
 b = [1, 6, 7]
 ```
 
-# Sympy 能求 xp 和 xn 吗？
+# sympy 能算特解吗？
 
-能，而且 **SymPy 正好可以一次给出书里的 \(x_p\)、\(x_n\) 和 \(n-r\) 个特殊解**。
+能。对于非齐次方程组
 
-在 `SymPy.jl` 中：
+$$
+A\mathbf{x}=\mathbf{b}
+$$
+
+SymPy 可以先算出通解，再把自由参数取 \(0\)，得到一个特解。
+
+```python
+from sympy import Matrix
+
+A = Matrix([
+    [1, 2, 1],
+    [2, 4, 3],
+])
+
+b = Matrix([4, 9])
+
+solution, parameters = A.gauss_jordan_solve(b)
+
+display(solution)
+display(parameters)
+```
+
+可能得到：
+
+$$
+\mathbf{x}=
+\begin{bmatrix}
+-2\tau_0-3\\
+\tau_0\\
+5
+\end{bmatrix}
+$$
+
+其中 \(\tau_0\) 是自由参数。
+
+把自由参数设为 \(0\)：
+
+```python
+particular = solution.subs({p: 0 for p in parameters})
+
+display(particular)
+```
+
+得到一个特解：
+
+$$
+\mathbf{x}_p=
+\begin{bmatrix}
+-3\\
+0\\
+5
+\end{bmatrix}
+$$
+
+可以验证：
+
+```python
+display(A * particular)
+display(b)
+```
+
+完整写法：
+
+```python
+solution, parameters = A.gauss_jordan_solve(b)
+
+particular = solution.subs({p: 0 for p in parameters})
+
+display(particular)
+```
+
+这里要注意：
+
+- `solution` 是含自由参数的**通解**
+- `particular` 是把自由变量取 \(0\) 得到的**一个特解**
+- 特解通常不唯一
+- `A.nullspace()` 算的是齐次方程 \(A\mathbf{x}=0\) 的特殊解/零空间基，不是非齐次方程的特解
+
+最终通解可以理解为：
+
+$$
+\mathbf{x}=\mathbf{x}_p+\mathbf{x}_n
+$$
+
+其中 \(\mathbf{x}_p\) 是特解，\(\mathbf{x}_n\) 是零空间中的任意向量。
+
+# `particular = solution.subs({p: 0 for p in parameters})` 这是什么语法，为什么这个迭代能用？
+
+这其实是两层语法叠在一起：
+
+```python
+particular = solution.subs({p: 0 for p in parameters})
+```
+
+里面的这一段：
+
+```python
+{p: 0 for p in parameters}
+```
+
+叫作**字典推导式**，等价于：
+
+```python
+parameter_values = {}
+
+for p in parameters:
+    parameter_values[p] = 0
+```
+
+假设：
+
+```python
+parameters = Matrix([[tau0], [tau1]])
+```
+
+虽然它是一个 SymPy 矩阵，但矩阵本身可以迭代，迭代时会依次取出其中的元素：
+
+```python
+for p in parameters:
+    print(p)
+```
+
+输出：
+
+```text
+tau0
+tau1
+```
+
+所以：
+
+```python
+{p: 0 for p in parameters}
+```
+
+最终生成：
+
+```python
+{tau0: 0, tau1: 0}
+```
+
+然后 `subs()` 接受一个替换字典：
+
+```python
+solution.subs({tau0: 0, tau1: 0})
+```
+
+意思是：
+
+> 在 `solution` 中，把 `tau0` 和 `tau1` 都替换为 \(0\)。
+
+例如：
+
+```python
+from sympy import Matrix, symbols
+
+tau0, tau1 = symbols("tau0 tau1")
+
+solution = Matrix([[2 - tau0], [tau0 + tau1], [tau1]])
+
+parameters = Matrix([tau0, tau1])
+
+particular = solution.subs({p: 0 for p in parameters})
+
+display(particular)
+```
+
+相当于：
+
+```python
+particular = solution.subs({tau0: 0, tau1: 0})
+```
+
+结果是：
+
+$$
+\begin{bmatrix}
+2\\
+0\\
+0
+\end{bmatrix}
+$$
+
+也可以拆开写得更容易理解：
+
+```python
+parameter_values = {p: 0 for p in parameters}
+
+display(parameter_values)
+
+particular = solution.subs(parameter_values)
+display(particular)
+```
+
+因此，关键在于：
+
+```python
+for p in parameters
+```
+
+之所以能用，是因为 SymPy 的 `Matrix` 是**可迭代对象**，迭代得到的是矩阵中的每一个元素，而这里每个元素恰好就是一个自由参数。
+
+# 我还是第一次字典推导式呢，它是批量给键赋值的？一般是赋一样的值的时候用的？
+
+对，可以先把它理解为：
+
+> **遍历一批对象，同时生成一批“键：值”映射。**
+
+基本形式是：
+
+```python
+{键表达式: 值表达式 for 元素 in 可迭代对象}
+```
+
+你刚才的代码：
+
+```python
+{p: 0 for p in parameters}
+```
+
+意思就是：
+
+```python
+for p in parameters:
+    把 p 作为键
+    把 0 作为值
+```
+
+假设：
+
+```python
+parameters = [tau0, tau1, tau2]
+```
+
+就会生成：
+
+```python
+{tau0: 0, tau1: 0, tau2: 0}
+```
+
+所以你说的没错：**批量给一批键赋相同的值**，确实是字典推导式很常见的一种用法。
+
+不过它不只适合赋相同的值。值也可以根据每个键动态计算。
+
+例如，计算每个数字的平方：
+
+```python
+numbers = [1, 2, 3, 4]
+
+squares = {n: n**2 for n in numbers}
+```
+
+结果：
+
+```python
+{1: 1, 2: 4, 3: 9, 4: 16}
+```
+
+这里每次循环生成的是：
+
+```python
+n: n**2
+```
+
+也就是：
+
+- 键是 `n`
+- 值是 `n**2`
+
+它等价于：
+
+```python
+squares = {}
+
+for n in numbers:
+    squares[n] = n**2
+```
+
+还可以同时加工键和值：
+
+```python
+names = ["alice", "bob", "carol"]
+
+name_lengths = {name.upper(): len(name) for name in names}
+```
+
+结果：
+
+```python
+{"ALICE": 5, "BOB": 3, "CAROL": 5}
+```
+
+这里：
+
+```python
+name.upper()
+```
+
+生成键，而：
+
+```python
+len(name)
+```
+
+生成值。
+
+还可以添加条件：
+
+```python
+numbers = [1, 2, 3, 4, 5, 6]
+
+even_squares = {n: n**2 for n in numbers if n % 2 == 0}
+```
+
+结果：
+
+```python
+{2: 4, 4: 16, 6: 36}
+```
+
+所以字典推导式可以概括为：
+
+```python
+{如何生成键: 如何生成值 for 当前元素 in 一批元素 if 可选条件}
+```
+
+你遇到的：
+
+```python
+{p: 0 for p in parameters}
+```
+
+属于最简单的一种：
+
+- 键随着迭代变化：`p`
+- 值始终不变：`0`
+
+不过专门把一批键都设成同一个值时，Python 还有一个更直接的写法：
+
+```python
+dict.fromkeys(parameters, 0)
+```
+
+也会得到：
+
+```python
+{tau0: 0, tau1: 0, tau2: 0}
+```
+
+因此刚才的代码也可以写成：
+
+```python
+particular = solution.subs(dict.fromkeys(parameters, 0))
+```
+
+但字典推导式更通用，因为以后可以把每个参数替换成不同的计算结果：
+
+```python
+{p: some_function(p) for p in parameters}
+```
+
+你可以把它类比成列表推导式：
+
+```python
+[n**2 for n in numbers]
+```
+
+列表推导式只生成值，而字典推导式每次生成一对：
+
+```
+键: 值
+```
+
+# julia 能算特解吗？
+
+能。最直接的是用 Julia 自带的 `LinearAlgebra`：
 
 ```julia
-using SymPy
+using LinearAlgebra
 
-A = Sym[
+A = [
+    1  2  1
+    2  4  3
+]
+
+b = [4, 9]
+
+xₚ = A \ b
+```
+
+这里的反斜杠：
+
+```julia
+A \ b
+```
+
+就是求解：
+
+$$
+A\mathbf{x}=\mathbf{b}
+$$
+
+对于有无穷多个解的欠定方程，Julia 会返回其中一个解；通常是**欧几里得范数最小的解**。
+
+上面的结果大约是：
+
+```julia
+3-element Vector{Float64}:
+ 0.6
+ 1.2
+ 1.0
+```
+
+验证：
+
+```julia
+A * xₚ
+```
+
+得到：
+
+```julia
+2-element Vector{Float64}:
+ 4.0
+ 9.0
+```
+
+所以它确实是一个特解。
+
+## 但它不一定是教材中的“自由变量取 0”
+
+这个方程组的通解实际上是：
+
+$$
+\mathbf{x}=
+\begin{bmatrix}
+3-2t\\
+t\\
+1
+\end{bmatrix}
+$$
+
+教材里常把自由变量 \(t=0\)，得到：
+
+$$
+\mathbf{x}_p=
+\begin{bmatrix}
+3\\
+0\\
+1
+\end{bmatrix}
+$$
+
+而 Julia 的：
+
+```julia
+A \ b
+```
+
+得到的是：
+
+$$
+\begin{bmatrix}
+0.6\\
+1.2\\
+1
+\end{bmatrix}
+$$
+
+两者都是特解，只是选择规则不同：
+
+- 教材：令自由变量为 \(0\)
+- Julia `A \ b`：选择长度最小的那个解
+
+## 用 `rref` 得到教材式特解
+
+你已经装了 `RowEchelon`，可以对增广矩阵做行最简：
+
+```julia
+using RowEchelon
+
+M = Rational{Int}.(
+    [
+        1  2  1  4
+        2  4  3  9
+    ]
+)
+
+R = rref(M)
+```
+
+结果是：
+
+```text
+2×4 Matrix{Rational{Int64}}:
+ 1  2  0  3
+ 0  0  1  1
+```
+
+代表：
+
+$$
+\begin{aligned}
+x_1+2x_2 &= 3\\
+x_3 &= 1
+\end{aligned}
+$$
+
+\(x_2\) 是自由变量。令 \(x_2=0\)，便得到：
+
+```julia
+xₚ = [3 // 1, 0 // 1, 1 // 1]
+```
+
+验证：
+
+```julia
+A * xₚ == b
+```
+
+结果是：
+
+```julia
+true
+```
+
+因此，**只想要任意一个数值特解就用 `A \ b`；想得到斯特朗教材里“自由变量取 0”的特解，就通过 `rref` 找出自由变量后设为 0。**
+
+顺便纠正一下前面 SymPy 示例中的计算：那个例子的自由变量取 \(0\) 后应为 \([3,0,1]^T\)，不是之前写的 \([-3,0,5]^T\)。
+
+# 一般增广矩阵用 M 表示吗？如何把 A 和 b 拼成 M？
+
+可以，增广矩阵常写成 \(M\)，但这只是变量名习惯，不是规定。数学上更常写成：
+
+$$
+[A\mid b]
+$$
+
+在 Julia 中，把 \(b\) 拼到 \(A\) 的右边即可：
+
+```julia
+b = [1, 6, 7]
+
+M = [A b]
+```
+
+也可以用函数：
+
+```julia
+M = hcat(A, b)
+```
+
+两种写法完全等价。
+
+你的完整代码：
+
+```julia
+using RowEchelon, Latexify, LinearAlgebra
+
+A = Rational{Int}[
     1 3 0 2
     0 0 1 4
     1 3 1 6
 ]
 
-b = Sym[1, 6, 7]
+b = [1, 6, 7]
+
+M = [A b]
+
+display(M)
+display(rref(M))
 ```
 
-注意这里用的是 `SymPy.Matrix`，不是普通的 Julia `Matrix`。
-
-## 1. 求完整通解
+此时：
 
 ```julia
-x, params = A.gauss_jordan_solve(b)
-
-display(x)
-display(params)
+size(A)  # (3, 4)
+size(b)  # (3,)
+size(M)  # (3, 5)
 ```
 
-`gauss_jordan_solve` 会用高斯－若尔当消元求解 \(Ax=b\)，对于欠定方程会自动引入自由参数。
+生成的 \(M\) 是：
 
-结果相当于：
+$$
+M=
+\begin{bmatrix}
+1&3&0&2&1\\
+0&0&1&4&6\\
+1&3&1&6&7
+\end{bmatrix}
+$$
+
+也就是：
+
+$$
+M=[A\mid b]
+$$
+
+### Julia 拼接规则
+
+```julia
+[A b]       # 横向拼接，增加列
+[A; B]      # 纵向拼接，增加行
+
+hcat(A, b)  # horizontal concatenate，横向拼接
+vcat(A, B)  # vertical concatenate，纵向拼接
+```
+
+所以增广矩阵必须用：
+
+```julia
+M = [A b]
+```
+
+而不是：
+
+```julia
+M = [A; b]  # 这是向下拼，通常会维度不匹配
+```
+
+变量名方面，下面都有人用：
+
+```julia
+M = [A b]
+Ab = [A b]
+Aug = [A b]
+```
+
+其中 `M` 最简洁，`Aug` 或 `Ab` 含义更明确。你现在学习时继续用 `M` 完全没问题。
+
+## M 是什么的缩写，为什么很多用 M？
+
+`M` 通常就是 **Matrix（矩阵）** 的缩写。
+
+很多人写：
+
+```julia
+M = [A b]
+```
+
+只是因为它表示“这个整体是一个矩阵”，并不专门表示“增广矩阵”。
+
+更明确的变量名其实是：
+
+```julia
+Aug = [A b]   # augmented matrix
+```
+
+或者：
+
+```julia
+Ab = [A b]
+```
+
+因为数学上增广矩阵写作：
+
+$$
+[A\mid b]
+$$
+
+所以：
+
+- `M`：Matrix，通用、简短
+- `Aug`：Augmented matrix，最明确
+- `Ab`：表示由 \(A\) 和 \(b\) 拼成
+- `R`：通常用来表示 `rref` 之后的矩阵
+
+例如：
+
+```julia
+M = [A b]
+R = rref(M)
+```
+
+这里读起来就是：
+
+> `M` 是原始矩阵，`R` 是它的行最简形。
+
+因此很多教材或代码用 `M`，主要是因为**短、通用、顺手**，不是严格约定。你自己写学习代码时，用：
+
+```julia
+Aug = [A b]
+```
+
+反而更不容易忘记它是什么。
+
+# A 通常代表原始矩阵吗？
+
+对，在线性代数里，**\(A\) 通常就是原始矩阵（original matrix / coefficient matrix）**，也是最常见的矩阵命名。
+
+比如：
+
+$$
+A\mathbf{x}=\mathbf{b}
+$$
+
+这里：
+
+- \(A\)：系数矩阵（coefficient matrix），通常就是题目给你的原始矩阵；
+- \(\mathbf{x}\)：未知向量；
+- \(\mathbf{b}\)：结果向量。
+
+例如：
+
+$$
+A=
+\begin{bmatrix}
+1&3&0&2\\
+0&0&1&4\\
+1&3&1&6
+\end{bmatrix}
+$$
+
+那么：
+
+$$
+A\mathbf{x}=
+\begin{bmatrix}
+1\\6\\7
+\end{bmatrix}
+$$
+
+其中：
+
+$$
+\mathbf{x}=
+\begin{bmatrix}
+x_1\\x_2\\x_3\\x_4
+\end{bmatrix}
+$$
+
+---
+
+经过行变换以后，一般会换名字：
+
+## 原矩阵
+
+$$
+A
+$$
+
+↓
+
+## 行简化矩阵
+
+$$
+R=\operatorname{rref}(A)
+$$
+
+或者教材里常写：
+
+$$
+R
+$$
+
+表示 row reduced form。
+
+---
+
+如果加上右侧的 \(b\)：
+
+$$
+[A|b]
+$$
+
+这个通常叫：
+
+- augmented matrix（增广矩阵）
+- 有时记为 \(M\)
+
+例如：
+
+$$
+M=[A|b]
+$$
+
+然后：
+
+$$
+R=\operatorname{rref}(M)
+$$
+
+---
+
+所以常见命名习惯：
+
+| 符号    | 含义                                       |
+| ------- | ------------------------------------------ |
+| \(A\)   | 原始矩阵、系数矩阵                         |
+| \(B,C\) | 其他矩阵                                   |
+| \(M\)   | 某个矩阵（经常用于增广矩阵）               |
+| \(R\)   | row echelon / reduced row echelon 后的矩阵 |
+| \(U\)   | 上三角矩阵（upper triangular）             |
+| \(L\)   | 下三角矩阵（lower triangular）             |
+
+---
+
+Strang 的书里也基本遵循这个习惯：
+
+$$
+A
+\rightarrow
+U
+$$
+
+比如消元：
+
+$$
+EA=U
+$$
+
+这里：
+
+- \(A\)：原始矩阵；
+- \(U\)：消元后的上三角矩阵；
+- \(E\)：消元矩阵。
+
+所以你前面理解的：
+
+> 主元列是原矩阵 \(A\) 中真正独立的信息
+
+这里的 \(A\) 就是那个**没有被消元、没有变形之前的原始矩阵**。
+
+一个很重要的点：
+
+**行变换后的矩阵 \(R\) 和 \(A\) 的列空间不一样。**
+
+因为行变换会改变列向量本身：
+
+$$
+C(A)\neq C(R)
+$$
+
+但是：
+
+$$
+\operatorname{rank}(A)=\operatorname{rank}(R)
+$$
+
+所以我们用 \(R\) 找主元位置，但列空间的基要回到原来的 \(A\) 里取主元列。
+
+这也是为什么教材强调：
+
+> Pivot columns of \(A\)，不是 pivot columns of \(R\)。
+
+你刚才说“主元列代表无冗余信息”，严格来说就是：
+
+**原矩阵 \(A\) 的主元列。**
+
+# gauss jordn solve 相当于把每一行就是该行主元的值，自由变量只有纯 tau
+
+对，你理解得基本对，但更准确地说：
+
+> `gauss_jordan_solve()` 会把每个未知数都解出来，按 \((x_1,x_2,\dots)\) 的顺序放进一个解向量中。
+
+它不是“每一行对应 RREF 的一行”，而是：
+
+> **解向量的第 \(i\) 行，对应变量 \(x_i\) 的值。**
+
+对于你的方程组，RREF 对应：
+
+$$
+\begin{aligned}
+x_1+3x_2+2x_4 &= 1\\
+x_3+4x_4 &= 6
+\end{aligned}
+$$
+
+主变量是 \(x_1,x_3\)，自由变量是 \(x_2,x_4\)。
+
+SymPy 先给自由变量分别起名字：
+
+$$
+x_2=\tau_0,\qquad x_4=\tau_1
+$$
+
+然后自动把它们移到等号右边：
+
+$$
+\begin{aligned}
+x_1 &= 1-3\tau_0-2\tau_1\\
+x_2 &= \tau_0\\
+x_3 &= 6-4\tau_1\\
+x_4 &= \tau_1
+\end{aligned}
+$$
+
+所以：
+
+```python
+solution, parameters = A.gauss_jordan_solve(b)
+```
+
+得到的 `solution` 是：
+
+$$
+\begin{bmatrix}
+1-3\tau_0-2\tau_1\\
+\tau_0\\
+6-4\tau_1\\
+\tau_1
+\end{bmatrix}
+$$
+
+这里每一行分别是：
+
+```text
+solution[0]  → x1 的值
+solution[1]  → x2 的值
+solution[2]  → x3 的值
+solution[3]  → x4 的值
+```
+
+可以这样查看：
+
+```python
+for i, value in enumerate(solution, start=1):
+    print(f"x{i} = {value}")
+```
+
+输出类似：
+
+```text
+x1 = -3*tau0 - 2*tau1 + 1
+x2 = tau0
+x3 = 6 - 4*tau1
+x4 = tau1
+```
+
+你说的“自由变量只有纯 `tau`”是对的：
+
+```text
+x2 = tau0
+x4 = tau1
+```
+
+因为自由变量不受主元方程约束，可以任意取值，所以 SymPy 直接用一个新参数代表它。
+
+而主变量会依赖这些自由参数：
+
+```text
+x1 = 1 - 3*tau0 - 2*tau1
+x3 = 6 - 4*tau1
+```
+
+因此可以用一个很实用的规律来读：
+
+- 某个位置只有纯 `tau`：这个变量是自由变量；
+- 某个位置是“常数加若干 `tau`”：这个变量是主变量；
+- 完全没有 `tau`：方程组有唯一解，没有自由变量。
+
+把所有 `tau` 取 \(0\)，就得到教材式特解：
+
+```python
+xp = solution.subs({p: 0 for p in parameters})
+```
+
+也就是：
+
+$$
+\mathbf{x}_p=
+\begin{bmatrix}
+1\\
+0\\
+6\\
+0
+\end{bmatrix}
+$$
+
+所以 `gauss_jordan_solve()` 本质上就是把 RREF 中的方程进一步整理成了：
+
+$$
+\text{主变量}=\text{常数}+\text{自由参数的组合}
+$$
+
+# tau 等于 0 时就是特解，就是 xp，那 xn 怎么理解，xp+xn 怎么理解？
+
+对。把所有 \(\tau\) 取 \(0\)，得到的是一个特解 \(\mathbf{x}_p\)。而 \(\mathbf{x}_n\) 就是通解里**所有含自由参数的部分**，它属于零空间。
+
+你的通解是：
+
+$$
+\mathbf{x}=
+\begin{bmatrix}
+1-3\tau_0-2\tau_1\\
+\tau_0\\
+6-4\tau_1\\
+\tau_1
+\end{bmatrix}
+$$
+
+把它拆成“常数部分 + 参数部分”：
+
+$$
+\mathbf{x}
+=
+\begin{bmatrix}
+1\\
+0\\
+6\\
+0
+\end{bmatrix}
++
+\begin{bmatrix}
+-3\tau_0-2\tau_1\\
+\tau_0\\
+-4\tau_1\\
+\tau_1
+\end{bmatrix}
+$$
+
+所以：
+
+$$
+\mathbf{x}_p=
+\begin{bmatrix}
+1\\
+0\\
+6\\
+0
+\end{bmatrix}
+$$
+
+而：
+
+$$
+\mathbf{x}_n=
+\begin{bmatrix}
+-3\tau_0-2\tau_1\\
+\tau_0\\
+-4\tau_1\\
+\tau_1
+\end{bmatrix}
+$$
+
+## \(\mathbf{x}_n\) 是什么
+
+把 \(\mathbf{x}_n\) 按参数拆开：
+
+$$
+\mathbf{x}_n
+=
+\tau_0
+\begin{bmatrix}
+-3\\
+1\\
+0\\
+0
+\end{bmatrix}
++
+\tau_1
+\begin{bmatrix}
+-2\\
+0\\
+-4\\
+1
+\end{bmatrix}
+$$
+
+这两个向量正是零空间的基方向：
+
+$$
+A
+\begin{bmatrix}
+-3\\
+1\\
+0\\
+0
+\end{bmatrix}
+=
+\mathbf{0}
+$$
+
+$$
+A
+\begin{bmatrix}
+-2\\
+0\\
+-4\\
+1
+\end{bmatrix}
+=
+\mathbf{0}
+$$
+
+因此无论 \(\tau_0,\tau_1\) 取什么值，都有：
+
+$$
+A\mathbf{x}_n=\mathbf{0}
+$$
+
+也就是说，\(\mathbf{x}_n\) 是齐次方程
+
+$$
+A\mathbf{x}=\mathbf{0}
+$$
+
+的任意解。
+
+## 为什么是 \(\mathbf{x}_p+\mathbf{x}_n\)
+
+因为：
+
+$$
+A\mathbf{x}_p=\mathbf{b}
+$$
+
+而：
+
+$$
+A\mathbf{x}_n=\mathbf{0}
+$$
+
+所以：
+
+$$
+A(\mathbf{x}_p+\mathbf{x}_n)
+=
+A\mathbf{x}_p+A\mathbf{x}_n
+=
+\mathbf{b}+\mathbf{0}
+=
+\mathbf{b}
+$$
+
+因此：
+
+$$
+\boxed{\mathbf{x}=\mathbf{x}_p+\mathbf{x}_n}
+$$
+
+就是全部解。
+
+直观上可以理解为：
+
+- \(\mathbf{x}_p\)：先找到解集合中的一个点；
+- \(\mathbf{x}_n\)：沿零空间方向移动；
+- 沿零空间移动不会改变 \(A\mathbf{x}\)，所以移动后仍然满足 \(A\mathbf{x}=\mathbf{b}\)。
+
+例如取：
+
+$$
+\tau_0=1,\qquad \tau_1=0
+$$
+
+则：
+
+$$
+\mathbf{x}_n=
+\begin{bmatrix}
+-3\\
+1\\
+0\\
+0
+\end{bmatrix}
+$$
+
+于是另一个解是：
+
+$$
+\mathbf{x}
+=
+\mathbf{x}_p+\mathbf{x}_n
+=
+\begin{bmatrix}
+1\\
+0\\
+6\\
+0
+\end{bmatrix}
++
+\begin{bmatrix}
+-3\\
+1\\
+0\\
+0
+\end{bmatrix}
+=
+\begin{bmatrix}
+-2\\
+1\\
+6\\
+0
+\end{bmatrix}
+$$
+
+它仍然满足 \(A\mathbf{x}=\mathbf{b}\)。
+
+在 SymPy 中也可以直接拆：
+
+```python
+solution, parameters = A.gauss_jordan_solve(b)
+
+xp = solution.subs({p: 0 for p in parameters})
+xn = solution - xp
+
+display(xp)
+display(xn)
+display(A * xn)  # 零向量
+```
+
+所以最核心的一句话是：
+
+> \(\mathbf{x}_p\) 负责把结果送到 \(\mathbf{b}\)，\(\mathbf{x}_n\) 负责在不改变结果的情况下自由移动。
+
+# tau 等于 0 可以直接代入得到常数项，其它项能用 sympy 算出吗？
+
+能，而且非常简单。既然把所有 \(\tau\) 设为 \(0\) 得到常数部分 \(\mathbf{x}_p\)，那么剩下的参数部分直接用：
+
+```
+xn = solution - xp
+```
+
+完整写法：
+
+```python
+from sympy import Matrix, simplify
+
+A = Matrix([
+    [1, 3, 0, 2],
+    [0, 0, 1, 4],
+    [1, 3, 1, 6],
+])
+b = Matrix([1, 6, 7])
+solution, parameters = A.gauss_jordan_solve(b)
+
+# 所有 τ 取 0，得到特解
+zero_values = {p: 0 for p in parameters}
+xp = solution.subs(zero_values)
+
+# 通解减去特解，得到齐次解部分
+xn = simplify(solution - xp)
+
+display(solution)
+display(xp)
+display(xn)
+```
+
+你的例子中：
+
+$$
+\mathbf{x}=
+\begin{bmatrix}
+1-3\tau_0-2\tau_1\\
+\tau_0\\
+6-4\tau_1\\
+\tau_1
+\end{bmatrix}
+$$
+
+SymPy 会算出：
+
+$$
+\mathbf{x}_p=
+\begin{bmatrix}
+1\\
+0\\
+6\\
+0
+\end{bmatrix}
+$$
+
+以及：
+
+$$
+\mathbf{x}_n=
+\begin{bmatrix}
+-3\tau_0-2\tau_1\\
+\tau_0\\
+-4\tau_1\\
+\tau_1
+\end{bmatrix}
+$$
+
+因为：
+
+$$
+\mathbf{x}_n=\mathbf{x}-\mathbf{x}_p
+$$
+
+还可以验证：
+
+```python
+display(A * xp)  # 等于 b
+display(A * xn)  # 等于零向量
+```
+
+## 自动拆出每个 \(\tau\) 对应的向量
+
+如果还想让 SymPy 自动得到：
+
+$$
+\mathbf{x}_n
+=
+\tau_0
+\begin{bmatrix}
+-3\\
+1\\
+0\\
+0
+\end{bmatrix}
++
+\tau_1
+\begin{bmatrix}
+-2\\
+0\\
+-4\\
+1
+\end{bmatrix}
+$$
+
+可以对每个参数求导。因为通解对 \(\tau\) 是线性的，求导正好取出它的系数向量：
+
+```python
+basis_vectors = [solution.diff(p) for p in parameters]
+
+for p, v in zip(parameters, basis_vectors):
+    print(p)
+    display(v)
+```
+
+得到：
+
+```text
+tau0
+```
+
+$$
+\begin{bmatrix}
+-3\\
+1\\
+0\\
+0
+\end{bmatrix}
+$$
+
+```text
+tau1
+```
+
+$$
+\begin{bmatrix}
+-2\\
+0\\
+-4\\
+1
+\end{bmatrix}
+$$
+
+于是可以重新组成 \(\mathbf{x}_n\)：
+
+```python
+xn_from_basis = Matrix.zeros(A.cols, 1)
+
+for p, v in zip(parameters, basis_vectors):
+    xn_from_basis += p * v
+
+display(xn_from_basis)
+```
+
+所以最实用的三行就是：
+
+```python
+solution, parameters = A.gauss_jordan_solve(b)
+xp = solution.subs({p: 0 for p in parameters})
+xn = solution - xp
+```
+
+这里：
+
+- `solution`：完整通解 \(\mathbf{x}\)
+- `xp`：常数部分，也就是一个特解
+- `xn`：所有含 \(\tau\) 的部分，也就是零空间中的一般解
+  # xn 的意义是什么，就是自由列线性组合成 0，相互抵消的解？
+  对，**你可以把 \(\mathbf{x}\_n\) 理解为“一组让 \(A\) 的各列线性组合后相互抵消为零的系数”**。
+
+不过更准确地说，不是“自由列自己组合成零”，而是：
+
+> 选定自由变量后，主变量会自动配合它，使所有列的线性组合最终等于零。
+
+假设把 \(A\) 的四列记作：
+
+$$
+A=
+\begin{bmatrix}
+\mathbf{a}_1&\mathbf{a}_2&\mathbf{a}_3&\mathbf{a}_4
+\end{bmatrix}
+$$
+
+那么：
+
+$$
+A\mathbf{x}
+=
+x_1\mathbf{a}_1+x_2\mathbf{a}_2+x_3\mathbf{a}_3+x_4\mathbf{a}_4
+$$
+
+你的零空间通解是：
+
+$$
+\mathbf{x}_n=
+\tau_0
+\begin{bmatrix}
+-3\\
+1\\
+0\\
+0
+\end{bmatrix}
++
+\tau_1
+\begin{bmatrix}
+-2\\
+0\\
+-4\\
+1
+\end{bmatrix}
+$$
+
+看第一个零空间基向量：
+
+$$
+\begin{bmatrix}
+-3\\
+1\\
+0\\
+0
+\end{bmatrix}
+$$
+
+它表示：
+
+$$
+-3\mathbf{a}_1+\mathbf{a}_2=\mathbf{0}
+$$
+
+也就是：
+
+$$
+\mathbf{a}_2=3\mathbf{a}_1
+$$
+
+第二个基向量：
+
+$$
+\begin{bmatrix}
+-2\\
+0\\
+-4\\
+1
+\end{bmatrix}
+$$
+
+表示：
+
+$$
+-2\mathbf{a}_1-4\mathbf{a}_3+\mathbf{a}_4=\mathbf{0}
+$$
+
+也就是：
+
+$$
+\mathbf{a}_4=2\mathbf{a}_1+4\mathbf{a}_3
+$$
+
+所以它确实记录了：
+
+> \(A\) 的列之间有哪些线性依赖关系，以及用什么系数组合会互相抵消为零。
+
+## 为什么自由变量对应自由列
+
+这里第 2、4 列是自由列。
+
+令 \(x_2=1\)，其他自由变量为 \(0\)，主变量必须取：
+
+$$
+x_1=-3,\qquad x_3=0
+$$
+
+才能保证：
+
+$$
+-3\mathbf{a}_1+\mathbf{a}_2=\mathbf{0}
+$$
+
+令 \(x_4=1\)，其他自由变量为 \(0\)，主变量必须取：
+
+$$
+x_1=-2,\qquad x_3=-4
+$$
+
+才能保证：
+
+$$
+-2\mathbf{a}_1-4\mathbf{a}_3+\mathbf{a}_4=\mathbf{0}
+$$
+
+所以自由变量不是单独“乱动”，而是：
+
+> 自由变量一动，主变量跟着调整，确保总结果仍为零。
+
+## \(\mathbf{x}_p+\mathbf{x}_n\) 的列组合意义
+
+特解满足：
+
+$$
+A\mathbf{x}_p=\mathbf{b}
+$$
+
+也就是说，\(\mathbf{x}_p\) 提供了一组系数，把 \(A\) 的列组合成 \(\mathbf{b}\)。
+
+零空间解满足：
+
+$$
+A\mathbf{x}_n=\mathbf{0}
+$$
+
+也就是说，\(\mathbf{x}_n\) 提供了一组“内部抵消”的系数。
+
+把两者加起来：
+
+$$
+A(\mathbf{x}_p+\mathbf{x}_n)
+=
+A\mathbf{x}_p+A\mathbf{x}_n
+=
+\mathbf{b}+\mathbf{0}
+=
+\mathbf{b}
+$$
+
+所以可以很形象地理解：
+
+- \(\mathbf{x}_p\)：完成任务，组合出 \(\mathbf{b}\)；
+- \(\mathbf{x}_n\)：在内部加上一套相互抵消的调整；
+- \(\mathbf{x}_p+\mathbf{x}_n\)：系数虽然变了，但最终结果仍然是 \(\mathbf{b}\)。
+
+所以你说的“**相互抵消的解**”非常接近本质。更严谨的说法是：
+
+> \(\mathbf{x}_n\) 是让 \(A\) 的各列线性组合为零的系数向量，也就是列之间线性依赖关系的表达。
+
+# 矩阵的列空间与主元列们组成的列空间是一致的，也就是主元列们（单纯的无冗余信息）能组合出什么；零空间是主元列们和自由列们如何组合能把信息抵消掉（掩盖掉？）
+
+对，你这个理解已经非常接近 Strang 讲线性代数的核心思想了。我稍微修正一下术语：
+
+> **列空间 = 主元列张成的空间，因为主元列包含了所有独立信息；自由列只是这些主元列的线性组合。**
+
+所以：
+
+$$
+C(A)=C(\text{pivot columns})
+$$
+
+也就是说：
+
+- 原矩阵所有列：
+  $$\mathbf{a}_1,\mathbf{a}_2,\dots,\mathbf{a}_n$$
+- 其中主元列：
+  $$\mathbf{a}_{p1},\mathbf{a}_{p2},\dots,\mathbf{a}_{pr}$$
+
+那么：
+
+$$
+\operatorname{Col}(A)
+=
+\operatorname{span}
+(\mathbf{a}_{p1},\dots,\mathbf{a}_{pr})
+$$
+
+自由列不会增加新的方向。
+
+---
+
+你说：
+
+> 主元列们（单纯的无冗余信息）能组合出什么
+
+非常准确。
+
+比如：
+
+$$
+A=
+\begin{bmatrix}
+|&|&|\\
+a_1&a_2&a_3\\
+|&|&|
+\end{bmatrix}
+$$
+
+如果：
+
+$$
+a_3=2a_1-3a_2
+$$
+
+那么：
+
+- \(a_1,a_2\)：主元列
+- \(a_3\)：自由列
+
+列空间：
+
+$$
+C(A)=\operatorname{span}(a_1,a_2)
+$$
+
+因为第三列没有创造新信息。
+
+---
+
+然后零空间：
+
+$$
+N(A)=\{x:Ax=0\}
+$$
+
+你说：
+
+> 主元列们和自由列们如何组合能把信息抵消掉（掩盖掉？）
+
+这个“掩盖”其实很形象。
+
+因为：
+
+$$
+Ax=x_1a_1+x_2a_2+\cdots+x_na_n
+$$
+
+零空间就是寻找：
+
+$$
+x_1a_1+x_2a_2+\cdots+x_na_n=0
+$$
+
+也就是：
+
+> 哪些系数组合会让所有列的信息完全抵消。
+
+---
+
+例如：
+
+$$
+a_3=2a_1+3a_2
+$$
+
+那么：
+
+$$
+2a_1+3a_2-a_3=0
+$$
+
+对应：
+
+$$
+x=
+\begin{bmatrix}
+2\\
+3\\
+-1
+\end{bmatrix}
+$$
+
+于是：
+
+$$
+Ax=0
+$$
+
+这个 \(x\) 就是零空间里的一个方向。
+
+---
+
+所以两个空间其实研究的是两个相反的问题：
+
+|        | 问题             | 看什么   |
+| ------ | ---------------- | -------- |
+| 列空间 | 矩阵能产生什么？ | 有效信息 |
+| 零空间 | 矩阵丢失了什么？ | 冗余关系 |
+
+更抽象一点：
+
+$$
+A:\mathbb{R}^n\rightarrow\mathbb{R}^m
+$$
+
+输入空间：
+
+$$
+\mathbb{R}^n
+$$
+
+里面有两部分：
+
+$$
+\text{输入方向}
+=
+\text{有效方向}
++
+\text{被压扁的方向}
+$$
+
+其中：
+
+- 有效方向 → 映射到列空间；
+- 被压扁成 0 的方向 → 零空间。
+
+所以你现在把：
+
+- 主元列 = 信息来源；
+- 自由列 = 冗余信息；
+- 零空间 = 冗余信息如何抵消；
+
+这个框架建立起来以后，后面的四个基本子空间（列空间、零空间、行空间、左零空间）会顺很多。
+
+其实这正是 Strang 讲 rank-nullity 时想让学生形成的直觉。你已经开始从“算 rref”转向理解矩阵的信息结构了。
+
+# sympy 中有 x = A\b的直接实现吗？
+
+有，但写法和 Julia 不一样。
+
+Julia：
+
+```julia
+x = A \ b
+```
+
+在 SymPy（Python）里没有 `\` 这个运算符重载，一般用：
+
+## 方法 1：`LUsolve()`（最接近）
+
+```python
+x = A.LUsolve(b)
+```
+
+例如：
+
+```python
+from sympy import Matrix
+
+A = Matrix([
+    [1, 2],
+    [3, 4],
+])
+
+b = Matrix([5, 6])
+
+x = A.LUsolve(b)
+
+print(x)
+```
+
+得到：
+
+$$
+\mathbf{x}
+=
+\begin{bmatrix}
+-4\\
+\frac{9}{2}
+\end{bmatrix}
+$$
+
+---
+
+## 方法 2：`gauss_jordan_solve()`（你现在学习线代更适合）
+
+```python
+x, params = A.gauss_jordan_solve(b)
+```
+
+它对应高斯 - 约旦消元：
+
+$$
+A\mathbf{x}=\mathbf{b}
+$$
+
+并且能处理：
+
+- 唯一解；
+- 无穷多解；
+- 无解。
+
+例如：
+
+```python
+solution, parameters = A.gauss_jordan_solve(b)
+```
+
+返回的是通解。
+
+---
+
+## 方法 3：矩阵乘逆（不推荐）
+
+数学上：
+
+$$
+x=A^{-1}b
+$$
+
+SymPy：
+
+```python
+x = A.inv() * b
+```
+
+但是实际计算不推荐，因为：
+
+- 慢；
+- 数值稳定性差；
+- 没必要真的求逆。
+
+---
+
+所以对应关系：
+
+| 数学          | Julia    | SymPy                     |
+| ------------- | -------- | ------------------------- |
+| 求解 \(Ax=b\) | `A \ b`  | `A.LUsolve(b)`            |
+| 高斯约旦求解  | —        | `A.gauss_jordan_solve(b)` |
+| 求逆          | `inv(A)` | `A.inv()`                 |
+
+对于你现在学 Strang 的线性代数，我更推荐：
+
+- 看唯一解：`LUsolve`
+- 学特解/零空间/自由变量：`gauss_jordan_solve`
+
+因为 `gauss_jordan_solve()` 的输出形式刚好对应：
+
+$$
+\mathbf{x}=\mathbf{x}_p+\mathbf{x}_n
+$$
+
+这部分和你现在理解的列空间、零空间是直接连接的。
+
+# sympy 的 Ab 怎么组合？
+
+SymPy 里面组合增广矩阵 \([A|b]\) 用 `row_join()`，对应 Julia 的 `[A b]`。
+
+例如：
+
+```python
+from sympy import Matrix
+
+A = Matrix([
+    [1, 3, 0, 2],
+    [0, 0, 1, 4],
+    [1, 3, 1, 6],
+])
+
+b = Matrix([1, 6, 7])
+
+Ab = A.row_join(b)
+
+display(Ab)
+```
+
+得到：
+
+$$
+[A|b]=
+\begin{bmatrix}
+1&3&0&2&1\\
+0&0&1&4&6\\
+1&3&1&6&7
+\end{bmatrix}
+$$
+
+---
+
+也可以用 `hstack`：
+
+```python
+from sympy import Matrix
+
+Ab = Matrix.hstack(A, b)
+```
+
+效果一样。
+
+---
+
+对应关系：
+
+| 操作     | Julia       | SymPy                |
+| -------- | ----------- | -------------------- |
+| 横向拼接 | `[A b]`     | `A.row_join(b)`      |
+| 横向拼接 | `hcat(A,b)` | `Matrix.hstack(A,b)` |
+| 纵向拼接 | `[A;B]`     | `A.col_join(B)`      |
+
+---
+
+所以你的线代流程在 SymPy 中可以这样：
+
+```python
+from sympy import Matrix
+
+A = Matrix([[1, 3, 0, 2], [0, 0, 1, 4], [1, 3, 1, 6]])
+
+b = Matrix([1, 6, 7])
+
+Ab = A.row_join(b)
+
+R, pivots = Ab.rref()
+
+display(R)
+display(pivots)
+```
+
+这就对应教材：
+
+$$
+[A|b]\rightarrow R
+$$
+
+然后从 \(R\) 读出：
+
+- 主元列；
+- 自由变量；
+- 特解；
+- 零空间。
+
+你现在这个学习流程其实很适合 SymPy，因为它的 API 基本就是按线代教材的语言设计的。
+
+# 噢，我用字符串就可以了
+
+对，你也可以用字符串，这也是 SymPy 一个比较方便的地方。
+
+例如：
+
+```python
+xp = solution.subs({"tau0": 0})
+```
+
+SymPy 会尝试根据符号名称匹配：
+
+```python
+tau0 → 0
+```
+
+所以能工作。
+
+不过有一个小区别：
+
+## 推荐用 Symbol 对象
+
+```python
+xp = solution.subs({parameters[0]: 0})
+```
+
+或者：
+
+```python
+xp = solution.subs({p: 0 for p in parameters})
+```
+
+因为这是**精确引用那个符号**。
+
+---
+
+字符串方式：
+
+```python
+solution.subs({"tau0": 0})
+```
+
+本质上相当于：
+
+> 找名字叫 `"tau0"` 的符号，然后替换。
+
+优点：
+
+- 简单；
+- 不用管 Symbol 对象在哪里。
+
+缺点：
+
+- 如果有同名但不同假设的 Symbol，可能产生歧义；
+- 参数名变化时容易失效。
+
+---
+
+比如：
+
+```python
+from sympy import symbols
+
+a = symbols("x")
+b = symbols("x")
+
+a == b
+```
+
+这里 SymPy 认为：
+
+```python
+True
+```
+
+因为它们名字一样。
+
+所以：
+
+```python
+expr.subs({"x": 0})
+```
+
+会替换所有名字叫 `x` 的符号。
+
+---
+
+你现在学习线代，用：
+
+```python
+solution.subs({"tau0": 0, "tau1": 0})
+```
+
+完全可以，尤其是在 notebook 里探索很方便。
+
+但写成可复用代码，我还是建议：
+
+```python
+solution.subs({p: 0 for p in parameters})
+```
+
+因为它不依赖 SymPy 自动生成的参数名字。
+
+其实你刚才这个问题也暴露了 SymPy 一个特点：
+
+- Julia 更偏“变量就是变量”
+- SymPy 更偏“符号对象代表数学中的未知量”
+
+所以 SymPy 里经常要区分：
+
+- Python 变量名
+- SymPy Symbol 名称
+
+这是刚开始最容易踩的坑。
+
+# 来我们来捋一捋 xp 怎么求？
+
+好，我们把 **\(\mathbf{x}\_p\)（特解）怎么求**完整捋一遍。你现在已经理解了零空间，所以这一步会顺很多。
+
+目标：
+
+$$
+A\mathbf{x}=\mathbf{b}
+$$
+
+求一个：
+
+$$
+\mathbf{x}_p
+$$
+
+满足：
+
+$$
+A\mathbf{x}_p=\mathbf{b}
+$$
+
+注意：**特解不是唯一的**，我们只需要找一个。
+
+---
+
+## 第一步：构造增广矩阵
+
+例如：
+
+$$
+A=
+\begin{bmatrix}
+1&3&0&2\\
+0&0&1&4\\
+1&3&1&6
+\end{bmatrix}
+$$
+
+$$
+b=
+\begin{bmatrix}
+1\\6\\7
+\end{bmatrix}
+$$
+
+组成：
+
+$$
+[A|b]=
+\begin{bmatrix}
+1&3&0&2&1\\
+0&0&1&4&6\\
+1&3&1&6&7
+\end{bmatrix}
+$$
+
+---
+
+## 第二步：做 rref
+
+得到：
+
+$$
+\begin{bmatrix}
+1&3&0&2&1\\
+0&0&1&4&6\\
+0&0&0&0&0
+\end{bmatrix}
+$$
+
+对应方程：
+
+$$
+\begin{aligned}
+x_1+3x_2+2x_4&=1\\
+x_3+4x_4&=6
+\end{aligned}
+$$
+
+---
+
+## 第三步：找自由变量
+
+看主元：
+
+- 第 1 列是主元 → \(x_1\)
+- 第 3 列是主元 → \(x_3\)
+
+所以：
+
+$$
+x_2,x_4
+$$
+
+是自由变量。
+
+---
+
+## 第四步：求特解 \(x_p\)
+
+关键：
+
+> **把所有自由变量设为 0。**
+
+所以：
+
+$$
+x_2=0
+$$
+
+$$
+x_4=0
+$$
+
+代入：
+
+第一个方程：
+
+$$
+x_1+3(0)+2(0)=1
+$$
+
+所以：
+
+$$
+x_1=1
+$$
+
+第二个方程：
+
+$$
+x_3+4(0)=6
+$$
+
+所以：
+
+$$
+x_3=6
+$$
+
+因此：
+
+$$
+\boxed{
+x_p=
+\begin{bmatrix}
+1\\
+0\\
+6\\
+0
+\end{bmatrix}
+}
+$$
+
+---
+
+## 用 SymPy 自动化
+
+### 方法 1（最推荐）
+
+```python
+solution, parameters = A.gauss_jordan_solve(b)
+
+xp = solution.subs({p: 0 for p in parameters})
+```
+
+为什么有效？
+
+因为：
 
 $$
 x=
@@ -905,27 +3100,123 @@ x=
 \end{bmatrix}
 $$
 
+令：
+
+$$
+\tau_0=\tau_1=0
+$$
+
+剩下：
+
+$$
+x_p=
+\begin{bmatrix}
+1\\0\\6\\0
+\end{bmatrix}
+$$
+
+---
+
+## 从几何角度理解
+
+所有解：
+
+$$
+\mathbf{x}=\mathbf{x}_p+\mathbf{x}_n
+$$
+
 其中：
 
 $$
-\text{params}=
+A\mathbf{x}_p=b
+$$
+
+负责找到一个点：
+
+> “哪个输入能产生 \(b\)”
+
+而：
+
+$$
+A\mathbf{x}_n=0
+$$
+
+负责：
+
+> “哪些变化不会改变结果”
+
+所以解空间不是一个点，而是：
+
+$$
+\text{一个特解}+\text{零空间方向}
+$$
+
+也就是：
+
+$$
+\boxed{
+\text{所有解}=
+\text{一个起点}+\text{可以自由移动的方向}
+}
+$$
+
+---
+
+你现在可以把求 \(x_p\) 记成一句话：
+
+> **先 rref 找出自由变量，然后把自由变量全部设为 0，剩下的主变量就是特解。**
+
+这就是 Strang 里 \(x_p\) 的来源。你之前困惑的“为什么突然有一个特解”，其实就是因为**非齐次解空间是零空间平移后的空间**。
+
+# 那再捋一下 xn 怎么算呢
+
+好，我们把 \(\mathbf{x}_n\)（零空间部分）也完整捋一遍。你已经理解 \(x_p\) 了，\(x_n\) 其实就是把通解里的“参数部分”拿出来。
+
+目标：
+
+$$
+A\mathbf{x}_n=0
+$$
+
+也就是求齐次方程：
+
+$$
+A\mathbf{x}=0
+$$
+
+的所有解。
+
+---
+
+## 方法 1：从通解拆出来（最符合你现在的理解）
+
+假设：
+
+```python
+solution, parameters = M.gauss_jordan_solve(b)
+```
+
+得到：
+
+$$
+\mathbf{x}
+=
 \begin{bmatrix}
+1-3\tau_0-2\tau_1\\
 \tau_0\\
+6-4\tau_1\\
 \tau_1
 \end{bmatrix}
 $$
 
-也就是自由变量。
+---
 
-## 2. 求书里的 \(x_p\)
+### 第一步：求特解
 
-把所有自由参数设为 \(0\)：
+所有参数设为 0：
 
-```julia
-zero_params = Dict(p => 0 for p in params)
-xp = x.subs(zero_params)
-
-display(xp)
+```python
+xp = solution.subs({p: 0 for p in parameters})
 ```
 
 得到：
@@ -933,20 +3224,16 @@ display(xp)
 $$
 x_p=
 \begin{bmatrix}
-1\\
-0\\
-6\\
-0
+1\\0\\6\\0
 \end{bmatrix}
 $$
 
-这正是书中“自由变量全部设为 \(0\)”得到的特解。SymPy 官方文档也用相同方法：先得到参数化通解，再把参数替换为 \(0\)，得到一个固定特解。
+---
 
-## 3. 求一般的 \(x_n\)
+### 第二步：通解减特解
 
-```julia
-xn = x - xp
-display(xn)
+```python
+xn = solution - xp
 ```
 
 得到：
@@ -961,7 +3248,370 @@ x_n=
 \end{bmatrix}
 $$
 
-拆开就是：
+这就是零空间中的任意向量。
+
+因为：
+
+$$
+A(x-x_p)=Ax-Ax_p=b-b=0
+$$
+
+所以：
+
+$$
+A x_n=0
+$$
+
+---
+
+## 方法 2：直接求零空间（更直接）
+
+SymPy 有：
+
+```python
+nullspace()
+```
+
+注意这里不用 \(b\)，因为零空间只看 \(A\)：
+
+```python
+basis = A.nullspace()
+```
+
+返回：
+
+```text
+[
+ Matrix([
+ [-3],
+ [ 1],
+ [ 0],
+ [ 0]
+ ]),
+ Matrix([
+ [-2],
+ [ 0],
+ [-4],
+ [ 1]
+ ])
+]
+```
+
+也就是：
+
+$$
+N(A)=
+\operatorname{span}
+\left\{
+\begin{bmatrix}
+-3\\1\\0\\0
+\end{bmatrix},
+\begin{bmatrix}
+-2\\0\\-4\\1
+\end{bmatrix}
+\right\}
+$$
+
+---
+
+## 两种方法的关系
+
+从通解：
+
+$$
+x_n=
+\tau_0
+\begin{bmatrix}
+-3\\1\\0\\0
+\end{bmatrix}
++
+\tau_1
+\begin{bmatrix}
+-2\\0\\-4\\1
+\end{bmatrix}
+$$
+
+所以：
+
+```python
+A.nullspace()
+```
+
+给你的就是每个 \(\tau\) 前面的系数向量。
+
+---
+
+## 在 SymPy 中推荐这样写
+
+如果你想学习 Strang 的：
+
+$$
+x=x_p+x_n
+$$
+
+建议：
+
+```python
+solution, parameters = A.gauss_jordan_solve(b)
+
+xp = solution.subs({p: 0 for p in parameters})
+
+xn = solution - xp
+
+display(xp)
+display(xn)
+```
+
+如果想研究零空间结构：
+
+```python
+null_basis = A.nullspace()
+
+for v in null_basis:
+    display(v)
+```
+
+---
+
+所以记忆：
+
+$$
+\boxed{x_p=\text{通解中所有 }\tau=0\text{ 的部分}}
+$$
+
+$$
+\boxed{x_n=\text{通解}-x_p}
+$$
+
+或者：
+
+$$
+\boxed{x_n\in N(A)}
+$$
+
+也就是：
+
+> \(x_p\) 是找到一个能产生 \(b\) 的方案；  
+> \(x_n\) 是所有不会改变结果的调整方案。  
+> 两者相加就是全部解。
+
+# xn 就是消掉了常数项，全部是齐次的
+
+对，你这句话抓住了 \(x_n\) 的核心：
+
+> **\(x_n\) 就是把通解里的常数项消掉以后，剩下的纯齐次部分。**
+
+更数学一点：
+
+非齐次方程：
+
+$$
+A x=b
+$$
+
+它的通解：
+
+$$
+x=x_p+x_n
+$$
+
+其中：
+
+### 1. 特解 \(x_p\)
+
+它包含常数项：
+
+$$
+A x_p=b
+$$
+
+例如：
+
+$$
+x_p=
+\begin{bmatrix}
+1\\
+0\\
+6\\
+0
+\end{bmatrix}
+$$
+
+它负责产生右侧的 \(b\)。
+
+---
+
+### 2. 齐次部分 \(x_n\)
+
+把常数项去掉：
+
+$$
+x_n=x-x_p
+$$
+
+例如：
+
+通解：
+
+$$
+x=
+\begin{bmatrix}
+1-3\tau_0-2\tau_1\\
+\tau_0\\
+6-4\tau_1\\
+\tau_1
+\end{bmatrix}
+$$
+
+减掉：
+
+$$
+x_p=
+\begin{bmatrix}
+1\\
+0\\
+6\\
+0
+\end{bmatrix}
+$$
+
+得到：
+
+$$
+x_n=
+\begin{bmatrix}
+-3\tau_0-2\tau_1\\
+\tau_0\\
+-4\tau_1\\
+\tau_1
+\end{bmatrix}
+$$
+
+这里已经没有常数了，只有自由参数。
+
+---
+
+为什么它叫齐次？
+
+因为：
+
+$$
+A(x-x_p)=Ax-Ax_p
+$$
+
+而：
+
+$$
+Ax=b
+$$
+
+$$
+Ax_p=b
+$$
+
+所以：
+
+$$
+A(x-x_p)=b-b=0
+$$
+
+因此：
+
+$$
+Ax_n=0
+$$
+
+它自动落入零空间：
+
+$$
+x_n\in N(A)
+$$
+
+---
+
+从几何角度：
+
+$$
+\boxed{x_p}
+$$
+
+是解空间里的一个点。
+
+$$
+\boxed{x_n}
+$$
+
+是从这个点出发，可以自由移动的方向。
+
+所以：
+
+$$
+\boxed{\text{非齐次解空间}=\text{一个特解}+\text{零空间}}
+$$
+
+你刚才说“消掉常数项”，其实就是从：
+
+$$
+\text{产生 }b
+$$
+
+变成：
+
+$$
+\text{产生 }0
+$$
+
+也就是从：
+
+$$
+Ax=b
+$$
+
+切换到：
+
+$$
+Ax=0
+$$
+
+这正是为什么零空间和特解能拼在一起。你现在已经把 \(x_p+x_n\) 的代数意义和几何意义连起来了。
+
+# 特解只有一个吗？
+
+不是，**特解一般不止一个**。
+
+准确地说：
+
+> 只要方程 \(Ax=b\) 有多个解，那么其中任何一个解都可以叫“特解”。
+
+“特解”这个词的意思只是：
+
+$$
+A x_p=b
+$$
+
+满足这个条件的**一个具体解**。
+
+---
+
+比如我们的例子：
+
+$$
+x_p=
+\begin{bmatrix}
+1\\
+0\\
+6\\
+0
+\end{bmatrix}
+$$
+
+这是一个特解，因为：
+
+$$
+A x_p=b
+$$
+
+但是如果加上任意零空间解：
 
 $$
 x_n=
@@ -982,80 +3632,1221 @@ x_n=
 \end{bmatrix}
 $$
 
-所以：
+得到：
 
 $$
 x=x_p+x_n
 $$
 
-## 4. 直接求 \(n-r\) 个特殊解
-
-```julia
-special_solutions = A.nullspace()
-
-display(special_solutions)
-```
-
-`nullspace()` 返回一组张成零空间的列向量，也就是书中所说的 \(n-r\) 个特殊解。
-
-这里会得到两个向量：
+仍然满足：
 
 $$
+Ax=b
+$$
+
+例如取：
+
+$$
+\tau_0=1,\quad \tau_1=0
+$$
+
+得到：
+
+$$
+x=
+\begin{bmatrix}
+1\\0\\6\\0
+\end{bmatrix}
++
+\begin{bmatrix}
+-3\\1\\0\\0
+\end{bmatrix}
+=
+\begin{bmatrix}
+-2\\1\\6\\0
+\end{bmatrix}
+$$
+
+这个也是特解：
+
+$$
+A
+\begin{bmatrix}
+-2\\1\\6\\0
+\end{bmatrix}
+=b
+$$
+
+---
+
+所以这里有一个容易混淆的地方：
+
+### “一个特解” \(x_p\)
+
+通常教材选：
+
+$$
+\boxed{\text{所有自由变量}=0}
+$$
+
+得到的那个最简单的解。
+
+它只是代表整个解空间的一个起点。
+
+---
+
+### “所有特解的集合”
+
+实际上：
+
+$$
+\{x_p+x_n:x_n\in N(A)\}
+$$
+
+也就是：
+
+$$
+\boxed{x_p+N(A)}
+$$
+
+---
+
+几何上：
+
+假设：
+
+$$
+Ax=b
+$$
+
+的解是一条直线。
+
+那么：
+
+- \(x_p\)：直线上的任意一个点；
+- \(x_n\)：这条直线的方向；
+- \(x_p+x_n\)：沿着方向移动后的其他点。
+
+所以：
+
+> 特解不是唯一的；零空间决定了你可以从一个特解移动到哪些其他特解。
+
+只有一种情况特解唯一：
+
+$$
+N(A)=\{0\}
+$$
+
+也就是：
+
+- 没有自由变量；
+- \(A\) 列满秩；
+- 方程有唯一解。
+
+这时候：
+
+$$
+x=x_p
+$$
+
+没有 \(x_n\) 可以加。你现在理解的“\(x_p+x_n\)”其实就是在解释**为什么非唯一解一定形成一个平移后的空间**。
+
+# 所有自由变量等于 0 的解只有一个，自由变量等于其它值时算出来的解也是特解？
+
+对，你这个理解是正确的。
+
+更精确地说：
+
+> **把所有自由变量设为 0 得到的那个解，只有一个；但自由变量取其它值算出来的每一个解，也都是特解。**
+
+因为“特解”的定义非常宽：
+
+$$
+A x_p=b
+$$
+
+只要满足这个方程，就是一个特解。
+
+---
+
+比如：
+
+$$
+x=
+\begin{bmatrix}
+1-3\tau_0-2\tau_1\\
+\tau_0\\
+6-4\tau_1\\
+\tau_1
+\end{bmatrix}
+$$
+
+### 情况 1：自由变量全取 0
+
+$$
+\tau_0=0,\quad \tau_1=0
+$$
+
+得到：
+
+$$
+x_p^{(0)}=
+\begin{bmatrix}
+1\\0\\6\\0
+\end{bmatrix}
+$$
+
+这是一个特解。
+
+---
+
+### 情况 2：自由变量取其它值
+
+比如：
+
+$$
+\tau_0=1,\quad\tau_1=0
+$$
+
+得到：
+
+$$
+x=
+\begin{bmatrix}
+-2\\1\\6\\0
+\end{bmatrix}
+$$
+
+因为：
+
+$$
+A
+\begin{bmatrix}
+-2\\1\\6\\0
+\end{bmatrix}
+=b
+$$
+
+所以它也是特解。
+
+---
+
+但是为什么教材总喜欢把：
+
+$$
+\tau=0
+$$
+
+得到的叫 \(x_p\)？
+
+因为它最简单，而且方便拆分：
+
+$$
+x=x_p+x_n
+$$
+
+例如：
+
+$$
+x_p=
+\begin{bmatrix}
+1\\0\\6\\0
+\end{bmatrix}
+$$
+
+然后：
+
+$$
+x_n=
+\tau_0
+\begin{bmatrix}
+-3\\1\\0\\0
+\end{bmatrix}
++
+\tau_1
+\begin{bmatrix}
+-2\\0\\-4\\1
+\end{bmatrix}
+$$
+
+于是：
+
+$$
+x=x_p+x_n
+$$
+
+---
+
+所以可以这样记：
+
+- **特解（particular solution）**：任意一个满足 \(Ax=b\) 的具体解；
+- **标准特解 \(x_p\)**：通常约定自由变量全部取 0 得到的那个；
+- **通解**：
+
+$$
+\boxed{x=x_p+x_n}
+$$
+
+其中 \(x_n\) 是所有齐次解。
+
+你刚才其实已经发现了一个很重要的点：
+
+> \(x_p\) 不是“特殊到唯一的那个解”，而是人为挑出来作为起点的那个解。
+
+真正唯一的是：
+
+- 零空间为零时，整个解唯一；
+- 有自由变量时，特解有无穷多个。
+  # 我理解这些有什么用
+  这个问题问得非常好，因为你已经开始问“为什么学这个”，而不是只记步骤了。
+
+简单说：
+
+> **理解 \(x_p\)、\(x_n\)、零空间，是为了理解一个方程组为什么有多个解，以及这些解之间是什么关系。**
+
+它不是为了以后天天手算特解，而是为了建立“矩阵处理信息”的思维。
+
+---
+
+## 1. 最直接的用途：判断解是不是唯一
+
+比如：
+
+$$
+Ax=b
+$$
+
+你通过 rref 发现：
+
+- 每列都有主元：
+
+$$
+r=n
+$$
+
+那么：
+
+$$
+N(A)=\{0\}
+$$
+
+没有 \(x_n\)。
+
+所以：
+
+$$
+x=x_p
+$$
+
+只有一个解。
+
+---
+
+如果有自由变量：
+
+$$
+r<n
+$$
+
+那么：
+
+$$
+\dim N(A)=n-r>0
+$$
+
+存在：
+
+$$
+x_n\neq0
+$$
+
+于是：
+
+$$
+x=x_p+x_n
+$$
+
+有无限多个解。
+
+这在工程、统计、机器学习里非常重要。
+
+---
+
+## 2. 理解“信息冗余”
+
+你前面说：
+
+> 信息有冗余才可以组合成 0
+
+这个就是核心。
+
+例如：
+
+$$
+A x_n=0
+$$
+
+说明：
+
+存在一些输入变化：
+
+$$
+x_n
+$$
+
+经过矩阵以后完全消失。
+
+也就是：
+
+$$
+\text{输入改变了}
+\]
+
+但是：
+
+$$
+
+\text{输出没有改变}
+\]
+
+这就是：
+
+- 数据冗余；
+- 不可识别性；
+- 参数不唯一。
+
+---
+
+## 3. 统计建模里非常常见
+
+你以后做 SEM、回归其实一直遇到这个。
+
+例如：
+
+$$
+y=X\beta
+$$
+
+如果：
+
+$$
+X\beta_1=X\beta_2
+$$
+
+说明：
+
+$$
+X(\beta_1-\beta_2)=0
+$$
+
+那么：
+
+$$
+\beta_1-\beta_2\in N(X)
+$$
+
+也就是说：
+
+> 存在不同参数组合产生完全一样的数据解释。
+
+这就是：
+
+- 共线性；
+- 不可识别；
+- 参数估计不稳定。
+
+---
+
+## 4. 为什么 PCA、降维会用到
+
+数据矩阵：
+
+$$
+X
+$$
+
+里面很多变量可能高度相关。
+
+例如：
+
+身高、腿长、体重可能包含重复信息。
+
+矩阵的秩：
+
+$$
+rank(X)
+$$
+
+告诉你：
+
+> 真正有多少独立信息。
+
+零空间告诉你：
+
+> 哪些组合其实是重复的。
+
+---
+
+## 5. 最重要的是理解“解空间”
+
+以前解方程：
+
+$$
+2x=4
+$$
+
+得到：
+
+$$
+x=2
+$$
+
+觉得解就是一个数字。
+
+但线性代数告诉你：
+
+很多时候：
+
+$$
+Ax=b
+$$
+
+的答案不是一个点，而是：
+
+$$
+\boxed{\text{一个点}+\text{一些方向}}
+$$
+
+即：
+
+$$
+x_p+N(A)
+$$
+
+这个思想贯穿：
+
+- 线性回归；
+- 最小二乘；
+- 机器学习；
+- 信号处理；
+- 优化；
+- 深度学习。
+
+---
+
+所以你现在学 \(x_p+x_n\) 的价值不是“以后手算特解”，而是建立一个非常重要的概念：
+
+> **矩阵把一部分信息保留下来（列空间），把一部分信息压掉了（零空间）。**
+
+Strang 第三章其实就是在建立这个世界观。
+
+你现在从“怎么求 \(x_p\)”一路追到“为什么有 \(x_n\)”再追到“信息冗余”，方向是对的。后面学投影、最小二乘、SVD 时，这套理解会反复出现。
+
+# 什么叫一些方向？
+
+这个“一些方向”是线性代数里非常重要的几何概念。这里不是说普通空间里的东南西北方向，而是说：
+
+> **从一个解出发，可以沿哪些向量移动，而仍然保持满足方程。**
+
+我们看你的方程：
+
+$$
+Ax=b
+$$
+
+假设有一个特解：
+
+$$
+x_p=
+\begin{bmatrix}
+1\\
+0\\
+6\\
+0
+\end{bmatrix}
+$$
+
+它是解空间里的一个点。
+
+现在零空间里有一个向量：
+
+$$
+v=
 \begin{bmatrix}
 -3\\
 1\\
 0\\
 0
-\end{bmatrix},
-\qquad
-\begin{bmatrix}
--2\\
-0\\
--4\\
-1
 \end{bmatrix}
 $$
 
-完整代码可以写成：
+因为：
+
+$$
+Av=0
+$$
+
+所以：
+
+$$
+A(x_p+v)
+=
+Ax_p+Av
+=
+b+0
+=
+b
+$$
+
+也就是说：
+
+$$
+x_p+v
+$$
+
+还是解。
+
+---
+
+如果继续走：
+
+$$
+x_p+2v
+$$
+
+也还是解：
+
+$$
+A(x_p+2v)=b
+$$
+
+甚至：
+
+$$
+x_p-5v
+$$
+
+也还是解。
+
+所以这个 \(v\) 就是一个“方向”。
+
+你可以想象：
+
+```
+          x_p + 2v
+             *
+            /
+           /
+          *
+        x_p
+```
+
+沿着这条线走，所有点都是解。
+
+---
+
+如果有两个零空间基：
+
+$$
+v_1=
+\begin{bmatrix}
+-3\\1\\0\\0
+\end{bmatrix}
+$$
+
+$$
+v_2=
+\begin{bmatrix}
+-2\\0\\-4\\1
+\end{bmatrix}
+$$
+
+那么：
+
+$$
+x=x_p+c_1v_1+c_2v_2
+$$
+
+你不仅可以前后走 \(v_1\)，还可以前后走 \(v_2\)。
+
+两个方向组合起来，就是一个平面。
+
+---
+
+所以：
+
+- 一个零空间基向量 → 一条方向线；
+- 两个独立零空间基向量 → 一个方向平面；
+- 三个 → 三维方向空间。
+
+数学上：
+
+$$
+N(A)=\operatorname{span}(v_1,v_2,\dots)
+$$
+
+---
+
+为什么叫“方向”而不是“点”？
+
+因为零空间里的向量一定经过原点：
+
+$$
+A0=0
+$$
+
+例如：
+
+$$
+\begin{bmatrix}
+-3\\1\\0\\0
+\end{bmatrix}
+$$
+
+它表示的是一个箭头：
+
+- 起点：原点；
+- 终点：这个向量。
+
+而解空间：
+
+$$
+x_p+N(A)
+$$
+
+是在这个方向空间上**平移**。
+
+所以：
+
+- 零空间：方向（经过原点）；
+- 非齐次解集：平移后的方向空间。
+
+这就是为什么 Strang 总说：
+
+$$
+\boxed{\text{solutions = particular solution + nullspace}}
+$$
+
+翻译成人话：
+
+> 先找到一个落脚点，然后沿着不会改变结果的方向随便走。你走到哪里，仍然是解。
+
+# 一共有 n-r 个方向？
+
+对，**如果 \(A\) 有 \(n\) 列，秩为 \(r\)，那么零空间有 \(n-r\) 个独立方向。**
+
+这就是 **秩 - 零化度定理（rank-nullity theorem）**：
+
+$$
+\boxed{\dim N(A)=n-r}
+$$
+
+其中：
+
+- \(n\)：未知数个数（列数）
+- \(r\)：主元个数（秩）
+- \(n-r\)：自由变量数量，也就是零空间维度
+
+---
+
+拿你的例子：
+
+$$
+A=
+\begin{bmatrix}
+1&3&0&2\\
+0&0&1&4\\
+1&3&1&6
+\end{bmatrix}
+$$
+
+它有：
+
+$$
+n=4
+$$
+
+经过 rref：
+
+主元列：
+
+- 第 1 列
+- 第 3 列
+
+所以：
+
+$$
+r=2
+$$
+
+因此：
+
+$$
+\dim N(A)=4-2=2
+$$
+
+也就是说：
+
+> 有两个独立的“自由移动方向”。
+
+对应：
+
+$$
+v_1=
+\begin{bmatrix}
+-3\\1\\0\\0
+\end{bmatrix}
+$$
+
+和：
+
+$$
+v_2=
+\begin{bmatrix}
+-2\\0\\-4\\1
+\end{bmatrix}
+$$
+
+---
+
+几何上：
+
+如果：
+
+$$
+n-r=0
+$$
+
+没有方向：
+
+$$
+x=x_p
+$$
+
+只有一个点。
+
+---
+
+如果：
+
+$$
+n-r=1
+$$
+
+一个方向：
+
+$$
+x=x_p+c_1v_1
+$$
+
+就是一条直线。
+
+---
+
+如果：
+
+$$
+n-r=2
+$$
+
+两个方向：
+
+$$
+x=x_p+c_1v_1+c_2v_2
+$$
+
+就是一个平面。
+
+---
+
+如果：
+
+$$
+n-r=3
+$$
+
+三个方向：
+
+就是三维超平面。
+
+---
+
+所以你现在可以把整个解结构记成：
+
+$$
+\boxed{
+Ax=b:
+\quad
+\text{一个特解}
++
+(n-r)\text{个自由方向}
+}
+$$
+
+而这和你前面理解的“信息冗余”完全对应：
+
+- \(r\)：真正保存的信息量；
+- \(n-r\)：被矩阵消掉的信息方向。
+
+列越冗余，自由方向越多。你现在已经把 Strang 第三章的核心串起来了。
+
+# 我才读到 3.3 呢就串起来了？后面还好几节呢
+
+哈哈，是的，你现在才到 **3.3（向量空间/零空间附近）**，后面确实还有很多内容。不过你现在串起来的是**第三章的主线骨架**，不是说第三章全部学完了。
+
+Strang 第三章其实是在逐层建立一个“大图”：
+
+---
+
+### 你现在已经抓住的核心（3.3 附近）
+
+你已经理解：
+
+$$
+Ax=b
+$$
+
+里面有两部分：
+
+$$
+\boxed{x=x_p+x_n}
+$$
+
+其中：
+
+- \(x_p\)：负责产生 \(b\)
+
+$$
+Ax_p=b
+$$
+
+- \(x_n\)：不会产生任何输出
+
+$$
+Ax_n=0
+$$
+
+这已经连接了：
+
+- 列空间；
+- 零空间；
+- 主元；
+- 自由变量；
+- 秩；
+- 冗余。
+
+这就是第三章最重要的思想之一。
+
+---
+
+但后面还有很多关键内容。
+
+## 3.4 左零空间（Left Nullspace）
+
+现在你学的是：
+
+$$
+Ax=0
+$$
+
+关注的是：
+
+> 哪些输入方向被 A 消掉？
+
+后面会看：
+
+$$
+A^Ty=0
+$$
+
+也就是：
+
+> 哪些输出方向和列空间垂直？
+
+它连接：
+
+- 列空间；
+- 行空间；
+- 正交性。
+
+---
+
+## 3.5 Ax=b 的可解条件
+
+你之前问过：
+
+> 为什么 \(b\) 必须在列空间？
+
+后面会正式讲：
+
+$$
+Ax=b\text{ 有解}
+\iff
+b\in C(A)
+$$
+
+也就是：
+
+$$
+b
+$$
+
+必须由主元列组合出来。
+
+---
+
+## 3.6 子空间的维度
+
+会正式总结：
+
+$$
+\dim C(A)=r
+$$
+
+$$
+\dim N(A)=n-r
+$$
+
+也就是你刚才说的：
+
+> 一共有 \(n-r\) 个方向
+
+---
+
+## 3.7 四个基本子空间
+
+这是第三章的大高潮：
+
+$$
+\begin{array}{c|c}
+\text{空间}&\text{维度}\\
+\hline
+C(A)&r\\
+N(A)&n-r\\
+C(A^T)&r\\
+N(A^T)&m-r
+\end{array}
+$$
+
+也就是：
+
+- 列空间；
+- 零空间；
+- 行空间；
+- 左零空间。
+
+---
+
+所以你现在的状态有点像：
+
+你已经看懂了地图：
+
+```
+              A
+              |
+    ---------------------
+    |                   |
+ 列空间              零空间
+(保留的信息)        (丢失的信息)
+    |                   |
+    b                  xn
+```
+
+但是后面要补：
+
+- 这些空间之间的关系；
+- 为什么正交；
+- 为什么维度这样分；
+- 如何计算。
+
+---
+
+其实你现在能把：
+
+> “自由变量 → 零空间方向 → 信息冗余 → n-r 个方向”
+
+这一串连起来，说明你没有停留在 rref 操作层面。
+
+很多人学线代到这里还只是：
+
+“主元列打勾，自由变量设 0，算答案”。
+
+你已经开始理解 Strang 想强调的：
+
+> 矩阵不是一个数字表，而是一个从一个空间映射到另一个空间的信息转换。
+
+所以后面几节不是推翻现在的理解，而是在这个骨架上继续加东西。你现在读 3.3，正好是进入“空间观点”的入口。
+
+# 我感觉手算部分很适合用 julia，自动部分还是 sympy 爽
+
+你的感觉其实很准确，这两个工具的定位刚好有点互补。
+
+## Julia：更像“数学实验台”
+
+特别适合你现在跟 Strang 学线性代数时的**手算过程复现**：
 
 ```julia
-using SymPy
+using LinearAlgebra
 
-A = SymPy.Matrix(
-    [
-        1 3 0 2
-        0 0 1 4
-        1 3 1 6
-    ]
-)
+A = [
+    1 3 0 2
+    0 0 1 4
+    1 3 1 6
+]
 
-b = SymPy.Matrix([1, 6, 7])
+b = [1, 6, 7]
 
-# Ax = b 的参数化通解
-x, params = A.gauss_jordan_solve(b)
-
-# 自由参数设为 0，得到书里的特解
-xp = x.subs(Dict(p => 0 for p in params))
-
-# 齐次部分
-xn = x - xp
-
-# 零空间的 n-r 个特殊解
-special_solutions = A.nullspace()
-
-display(x)
-display(xp)
-display(xn)
-display(special_solutions)
+x = A \ b
 ```
 
-对应关系是：
+它的优势：
 
-```text
-gauss_jordan_solve(b) → 完整通解 x
-参数全部设为 0       → xp
-x - xp                → 一般的 xn
-A.nullspace()          → n-r 个特殊解/零空间基
+- 语法接近数学记号；
+- `A \ b` 就是教材里的“解 \(Ax=b\)”；
+- 矩阵、向量是一等公民；
+- 数值线性代数非常强；
+- 和 MATLAB 的思路一致。
+
+比如：
+
+```julia
+rank(A)
+svd(A)
+eigen(A)
+qr(A)
 ```
 
-所以在这类教材式线性代数计算上，SymPy 确实比 Julia 的数值型 `A \ b` 更直接。
+这些都很自然。
+
+但是它偏**数值计算**：
+
+```julia
+A \ b
+```
+
+默认是在浮点数世界里求解。
+
+如果你想看：
+
+- \(\tau_0,\tau_1\)
+- 参数化通解
+- 符号表达式
+
+就不是它的强项。
+
+---
+
+## SymPy：更像“数学推导助手”
+
+你现在学的：
+
+$$
+x=x_p+x_n
+$$
+
+SymPy 就非常舒服：
+
+```python
+solution, parameters = A.gauss_jordan_solve(b)
+```
+
+直接给：
+
+$$
+x=
+\begin{bmatrix}
+1-3\tau_0-2\tau_1\\
+\tau_0\\
+6-4\tau_1\\
+\tau_1
+\end{bmatrix}
+$$
+
+然后：
+
+```python
+xp = solution.subs({p: 0 for p in parameters})
+```
+
+得到：
+
+$$
+x_p
+$$
+
+再：
+
+```python
+A.nullspace()
+```
+
+直接看：
+
+$$
+N(A)
+$$
+
+它适合：
+
+- 推导；
+- 验证公式；
+- 看结构；
+- 学概念。
+
+---
+
+所以你的学习流可以这样：
+
+## 1. 用 SymPy 理解结构
+
+比如：
+
+```python
+A.rref()
+A.nullspace()
+A.gauss_jordan_solve(b)
+```
+
+回答：
+
+> 为什么有自由变量？为什么有 \(n-r\) 个方向？
+
+---
+
+## 2. 用 Julia 练习计算
+
+比如：
+
+```julia
+A \ b
+rank(A)
+svd(A)
+```
+
+回答：
+
+> 实际计算怎么高效完成？
+
+---
+
+这其实和大学课程很像：
+
+- 理论课：符号推导；
+- MATLAB/Julia：数值实验。
+
+你现在用：
+
+> SymPy 负责“看懂数学”，Julia 负责“做数学”
+
+这个组合挺适合 MIT 18.06。
+
+尤其后面到：
+
+- 投影；
+- 最小二乘；
+- 正交；
+- SVD；
+
+Julia 的体验会明显提升，因为那些本质上就是数值线性代数。
+
+而你现在第三章刚好是符号结构占比高，所以 SymPy 会让你感觉特别爽。你这个工具分工判断基本是对的。
