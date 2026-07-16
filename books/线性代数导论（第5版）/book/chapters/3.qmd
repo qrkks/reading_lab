@@ -446,7 +446,7 @@ display(xp)
 #| output: asis
 
 from sympy import Matrix
-from IPython.display import display, Markdown
+from IPython.display import Markdown
 
 A = Matrix([
     [1, 3, 0, 2],
@@ -525,7 +525,7 @@ R = rref(M)
 #| output: asis
 
 from sympy import Matrix
-from IPython.display import display, Markdown
+from IPython.display import Markdown
 
 A = Matrix([
     [1, 3, 0, 2],
@@ -566,7 +566,7 @@ display("xn", xn)
 #| output: asis
 
 from sympy import Matrix, symbols
-from IPython.display import display, Markdown
+from IPython.display import Markdown
 
 b1, b2, b3 = symbols("b1,b2,b3")
 
@@ -645,7 +645,7 @@ display(latexify(size(A, 2)))
 #| output: asis
 
 from sympy import Matrix
-from IPython.display import display, Markdown
+from IPython.display import Markdown
 
 A = Matrix([
     [1, 1, 1, 3],
