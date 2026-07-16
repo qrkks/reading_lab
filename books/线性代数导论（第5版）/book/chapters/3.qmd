@@ -645,23 +645,58 @@ display(latexify(size(A, 2)))
 #| output: asis
 
 from sympy import Matrix
-from IPython.display import Markdown
+from IPython.display import Markdown, display
 
+# 系数矩阵：只有未知数的系数
 A = Matrix([
-    [1, 1, 1, 3],
-    [1, 2, -1, 4],
+    [1, 1, 1],
+    [1, 2, -1],
 ])
+
+# 方程右边
 b = Matrix([3, 4])
 
-R, piv = A.rref()
-display(Markdown("R,piv"))
+display(Markdown("系数矩阵 A"))
+display(A)
+
+# 增广矩阵只用于展示和行消元
+M = A.row_join(b)
+
+display(Markdown("增广矩阵 [A | b]"))
+display(M)
+
+R, piv = M.rref()
+
+display(Markdown("增广矩阵的 RREF"))
 display(R, piv)
 
-display(Markdown("gauss_jordan_solve"))
-s, p = A.gauss_jordan_solve(b)
-display(s, p)
+display(Markdown("通解"))
+s, parameters = A.gauss_jordan_solve(b)
+display(s, parameters)
 
-display(Markdown("xp"))
-xp = s.subs({p: 0 for p in p})
+display(Markdown("特解：令自由变量全部为 0"))
+xp = s.subs({parameter: 0 for parameter in parameters})
 display(xp)
 ```
+
+```{julia}
+using RowEchelon, Latexify, LinearAlgebra
+
+M = [
+    1 1 1 3
+    1 2 -1 4
+]
+
+R = copy(M)
+R[2, :] .-= R[1, :]
+display(R)
+R[1, :] .-= R[2, :]
+display(R)
+display(md("得到 ``[R d]``"))
+```
+
+[xn 的维度](../appendices/3.3.qmd#xn-的维度)
+
+[xp 的维度](../appendices/3.3.qmd#xp-的维度)
+
+[解空间](../appendices/3.3.qmd#解空间)
