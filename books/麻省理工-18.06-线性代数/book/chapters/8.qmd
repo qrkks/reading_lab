@@ -4,6 +4,7 @@ julia:
   env:
     - "JULIA_PYTHONCALL_EXE=@venv"
     - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
     - "NO_COLOR=1"
 ---
 
@@ -16,8 +17,10 @@ import PythonCall
 ## python
 
 ```{python}
+#| output: asis
+
 import sympy as sp
-from IPython.display import Math, display
+from books.assets.reading_lab_display import display
 
 A = sp.Matrix([
     [1, 2, 2, 2],
@@ -46,8 +49,10 @@ print("列空间维数（秩）：", col_basis_matrix.rank())
 需要符合什么条件？](../appendices/8.md#如果要方程组有解b-需要符合什么条件)
 
 ```{python}
+#| output: asis
+
 import sympy as sp
-from IPython.display import Latex, Markdown, display
+from IPython.display import Markdown
 
 b1, b2, b3 = sp.symbols("b1,b2,b3")
 
@@ -90,8 +95,10 @@ display("*A.rref(): ", *A.rref())
 2. Solve Ax=b for pivot variables
 
 ```{python}
+#| output: asis
+
 import sympy as sp
-from IPython.display import Math, Markdown, display
+from IPython.display import Markdown
 
 # 构造增广矩阵 [A|b]
 aug = sp.Matrix([
@@ -107,9 +114,11 @@ display(Markdown("主元列："), pivot)
 ```
 
 ```{python}
+#| output: asis
+
 import sympy as sp
 from sympy import Matrix
-from IPython.display import display, Markdown
+from IPython.display import Markdown
 
 # 求增广矩阵的行最简形，返回 RREF 和主元列下标
 rref_mat, pivots = aug.rref()

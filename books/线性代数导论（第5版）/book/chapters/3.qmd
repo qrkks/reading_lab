@@ -4,6 +4,7 @@ julia:
   env:
     - "JULIA_PYTHONCALL_EXE=@venv"
     - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
     - "NO_COLOR=1"
 ---
 
@@ -30,21 +31,7 @@ import PythonCall
 
 import sympy as sp
 from IPython.display import Markdown
-
-
-def display(*objects):
-    # Render IPython-style objects when Python runs inside Julia/PythonCall.
-    for obj in objects:
-        if isinstance(obj, Markdown):
-            print(obj.data)
-        elif hasattr(obj, "_repr_latex_") and obj._repr_latex_():
-            print(obj._repr_latex_())
-        elif isinstance(obj, (list, tuple)):
-            display(*obj)
-            continue
-        else:
-            print(obj)
-        print()
+from books.assets.reading_lab_display import display
 
 
 A = sp.Matrix([
@@ -645,7 +632,7 @@ display(latexify(size(A, 2)))
 #| output: asis
 
 from sympy import Matrix
-from IPython.display import Markdown, display
+from IPython.display import Markdown
 
 # 系数矩阵：只有未知数的系数
 A = Matrix([

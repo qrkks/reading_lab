@@ -33,6 +33,7 @@ julia:
   env:
     - "JULIA_PYTHONCALL_EXE=@venv"
     - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
     - "NO_COLOR=1"
 ---
 ```
@@ -56,33 +57,39 @@ julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
 CI 会在临时渲染目录中复制 Julia 项目文件，并把根目录的 `.venv` 链接过去。因此 QMD 中应使用 `JULIA_PYTHONCALL_EXE=@venv`，不要写死本机 Python 路径。
 
-### Python 富输出和换行
+### Python 富输出
 
-Julia 引擎中的 Python 代码由 PythonCall 执行，不存在 IPython/Jupyter 的 display publisher。直接调用 `IPython.display()` 时，SymPy 对象可能退化为普通文本。需要输出 Markdown 或 SymPy LaTeX 时，采用下面的兼容写法：
+Julia 引擎中的 Python 代码由 PythonCall 执行，不存在 IPython/Jupyter 的 display publisher。仓库提供了共享适配器 `books/assets/reading_lab_display.py`：在 Zed/IPython 中，它调用 IPython 原生富显示；在 Quarto/PythonCall 中，它把 Markdown、HTML 和 SymPy LaTeX 输出给 Pandoc。
+
+对于位于 `books/<书名>/book/chapters/` 的混编 QMD，先在上面的 `julia.env` 中设置 `PYTHONPATH=../../../..`，然后在第一个 Python 代码块中导入共享 `display`：
 
 ````markdown
 ```{python}
 #| output: asis
+
+import sympy as sp
 from IPython.display import Markdown
+from books.assets.reading_lab_display import display
 
-
-def display(*objects):
-    # Render IPython-style objects when Python runs inside Julia/PythonCall.
-    for obj in objects:
-        if isinstance(obj, Markdown):
-            print(obj.data)
-        elif hasattr(obj, "_repr_latex_") and obj._repr_latex_():
-            print(obj._repr_latex_())
-        elif isinstance(obj, (list, tuple)):
-            display(*obj)
-            continue
-        else:
-            print(obj)
-        print()
+A = sp.Matrix([[1, 0, -2], [0, 1, sp.Rational(3, 2)]])
+display(Markdown("行最简矩阵："), A)
 ```
 ````
 
-`output: asis` 会把输出重新交给 Pandoc 作为 Markdown 解析。Markdown 中普通的单换行会被折叠为空格，所以兼容函数必须在每个对象后额外执行一次 `print()`，用空行分隔输出段落。
+同一 QMD 完整渲染时，各个 Python 代码块共享命名空间，后续代码块可以继续使用 `display`。如果希望在 Zed 中单独执行某个代码块，则在该块中重复导入。
+
+可以从 `IPython.display` 导入 `Markdown`、`Math` 等对象，但不要导入它的 `display`：
+
+```python
+# 正确
+from IPython.display import Markdown
+from books.assets.reading_lab_display import display
+
+# 错误：会覆盖共享适配器
+from IPython.display import Markdown, display
+```
+
+每个需要显示 Markdown、HTML 或 LaTeX 的 Python 代码块都要设置 `#| output: asis`。它会把打印结果重新交给 Pandoc 解析；共享适配器会自动用空行分隔多个对象。普通的纯文本计算块不需要这个选项。
 
 ## HTML 默认参数
 
