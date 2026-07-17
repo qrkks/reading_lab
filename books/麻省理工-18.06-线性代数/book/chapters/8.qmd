@@ -1,8 +1,23 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
 # Ax = b 可解性及解的结构
+
+## python
 
 ```{python}
 import sympy as sp
-from IPython.display import display, Math
+from IPython.display import Math
 
 A = sp.Matrix([
     [1, 2, 2, 2],
@@ -17,7 +32,7 @@ col_basis_matrix = sp.Matrix.hstack(*col_basis)
 
 print("列空间基矩阵（每一列是一个基向量）：")
 print("col_basis: ")
-display(col_basis)
+display(*col_basis)
 print("col_basis_matrix: ")
 display(col_basis_matrix)
 print("*col_basis")
@@ -32,7 +47,7 @@ print("列空间维数（秩）：", col_basis_matrix.rank())
 
 ```{python}
 import sympy as sp
-from IPython.display import display, Latex, Markdown
+from IPython.display import Latex, Markdown
 
 b1, b2, b3 = sp.symbols("b1,b2,b3")
 
@@ -48,35 +63,35 @@ display(U)
 display(U[-1, -1])
 display(Markdown(f"方程组有没有解由 $U_{{-1,-1}}={sp.latex(U[-1, -1])}$ 决定。"))
 print("RREF: ")
-display("A.rref(): ", A.rref())
+# display("A.rref(): ", A.rref())
 display("*A.rref(): ", *A.rref())
 ```
 
-## 可解性（Solvability Condition on b）
+### 可解性（Solvability Condition on b）
 
 [我们看 AX 等于 B
 有没有解，就是它的可解性吗？就是讨论它的可解性吗？](../appendices/8.md#我们看-ax-等于-b-有没有解就是它的可解性吗就是讨论它的可解性吗)
 
-### $Ax=b \text{ solvable when } b \text{ is in } C(A)$
+#### $Ax=b \text{ solvable when } b \text{ is in } C(A)$
 
 [$Ax=b \text{ solvable when } b \text{ is in } C(A)$](../appendices/8.md#axb-text-solvable-when-b-text-is-in-ca)
 
-### If a combination of rows of A gives zero row then Same combination of b must give zero (number)
+#### If a combination of rows of A gives zero row then Same combination of b must give zero (number)
 
 [If a combination of rows of A gives zero row then Same combination of b must give zero (number)](../appendices/8.md#if-a-combination-of-rows-of-a-gives-zero-row-then-same-combination-of-b-must-give-zero-number)
 
-## To find complete solution to Ax=b
+### To find complete solution to Ax=b
 
 [To find complete solution to Ax=b](../appendices/8.md#to-find-complete-solution-to-axb)
 
-### 1 $x_{particular}$
+#### 1 $x_{particular}$
 
 1. Set all free variables to zero
 2. Solve Ax=b for pivot variables
 
 ```{python}
 import sympy as sp
-from IPython.display import display, Math, Markdown
+from IPython.display import Math, Markdown
 
 # 构造增广矩阵 [A|b]
 aug = sp.Matrix([
@@ -84,7 +99,7 @@ aug = sp.Matrix([
     [0, 2, 3],
 ])
 
-# 求行最简形，返回 (rref矩阵, 主元列下标)
+# 求行最简形，返回 (rref 矩阵，主元列下标)
 rref_mat, pivot = aug.rref()
 display(Markdown("增广矩阵行最简形："), rref_mat)
 display(Markdown(f"最后一列就是方程的解：${sp.latex(rref_mat[:, -1])}$"))
@@ -121,8 +136,175 @@ else:
 
 [rref 怎么看哪个是解？](../appendices/8.md#rref-怎么看哪个是解)
 
-### 2 $x_{nullspace}$
+#### 2 $x_{nullspace}$
 
 [$x_{nullspace}$ 是什么](../appendices/8.md#x_nullspace-是什么)
 
 [我是不是得理解上一节 Ax=0 的一些概念？](../appendices/8.md#我是不是得理解上一节-ax0-的一些概念)
+
+## julia
+
+```{julia}
+using RowEchelon, Latexify, LinearAlgebra, Symbolics
+
+@variables b1 b2 b3
+
+A = Rational{Int}[
+    1 2 2 2
+    2 4 6 8
+    3 6 8 10
+]
+
+b = [b1, b2, b3]
+
+M = hcat(A, b) # Augmented Matrix = [A b]
+
+display(M[1, :] .+ M[2, :])
+
+# 消元
+R = copy(M)
+R[2, :] .-= 2R[1, :]
+R[3, :] .-= 3R[1, :] .+ R[2, :]
+display(R)
+```
+
+所以有解的条件就是 0 = b3-b2-b1
+
+```{julia}
+# 假设一个 b 可以满足条件
+b = Rational{Int}[1, 5, 6]
+# display(A \ b) # julia 给不了精确解，因为不是方阵，是一个长方阵
+display(rref(hcat(A, b))) # 可以使用 rref 找到精确解
+```
+
+Solvability Condition on b
+
+- Ax = b solvable when b is in C(A)
+- if a combination of rows of A gives zero, then the same combination of entries of b must give 0.
+
+[Ax = b solvable when b is in C(A) 这怎么理解，我又忘了列空间是什么了](../appendices/8.qmd#ax-b-solvable-when-b-is-in-ca-这怎么理解我又忘了列空间是什么了)
+
+[但是举的这个例子是在线性组合行？那怎么又说到列空间了？](../appendices/8.qmd#但是举的这个例子是在线性组合行那怎么又说到列空间了)
+
+[Solvability Condition on b](../appendices/8.qmd#solvability-condition-on-b)
+
+To find complete solustion to Ax = b
+
+1 $x_{particular}$
+
+- Setall free variables to zero
+- Solve Ax=b for pivot variable
+
+```{julia}
+# 解线线性方程组
+# 自由变量都设为 0
+# 1，3 是前面设定的符合条件的具体值
+As = Rational{Int}[
+    1  2
+    0  2
+]
+
+b = [1, 3]
+
+solution = As \ b
+```
+
+[特解就是自由变量全为零；特殊解就是自由变量依次为 1，其它全为 0](../appendices/8.qmd#特解就是自由变量全为零特殊解就是自由变量依次为-1其它全为-0)
+
+[那特殊解是代到哪个方程解出来的？](../appendices/8.qmd#那特殊解是代到哪个方程解出来的)
+
+[pattern 是指什么？](../appendices/8.qmd#pattern-是指什么)
+
+### m by n matrix A of rank r
+
+[m by n matrix A of rank r 怎么翻译，m by n 是 m*n?](../appendices/8.qmd#m-by-n-matrix-a-of-rank-r-怎么翻译m-by-n-是-mn)
+
+```{julia}
+using RowEchelon, Latexify, LinearAlgebra
+
+r = rank(A)
+display(r)
+display(size(A))
+display(size(A, 1))
+display(size(A, 2))
+```
+
+#### Full column rank means r = n: No free variables
+
+$$
+N(A) = 
+\begin{Bmatrix}
+Zero\\
+Vector\\
+\end{Bmatrix}
+$$
+
+[这是什么意思？](../appendices/8.qmd#这是什么意思)
+
+Solution to Ax=b: $x=x_{p} unique solution if it exits.(0 or 1 solution)
+
+```{julia}
+using RowEchelon, Latexify, LinearAlgebra
+
+A = Rational{Int}[
+    1 3
+    2 1
+    4 1
+    5 1
+]
+
+display(rank(A))
+display(rref(A))
+```
+
+[Ax=0 永远有解吗？](../appendices/8.qmd#ax0-永远有解吗)
+
+[rank 为什么叫 rank](../appendices/8.qmd#rank-为什么叫-rank)
+
+#### Full row rank means r = m
+
+[列满秩的 rref 是`[I;Z]`；行满秩的是`[I F]`？](../appendices/8.qmd#列满秩的-rref-是iz行满秩的是i-f)
+
+Can solve Ax=b for every b
+
+[行满秩永远有解吗？](../appendices/8.qmd#行满秩永远有解吗)
+
+Left with n - r (= n - m) free variables
+
+```{julia}
+using RowEchelon, Latexify, LinearAlgebra
+
+A = Rational{Int}[
+    1 2 6 5
+    3 1 1 1
+]
+
+display(rank(A))
+display(rref(A))
+```
+
+[行满秩的自然 rref 就是$[I F]$形状吗？I 肯定会在前面吗？](../appendices/8.qmd#行满秩的自然-rref-就是i-f形状吗i-肯定会在前面吗)
+
+[列满秩的 I 自然是在上方的吗？](../appendices/8.qmd#列满秩的-i-自然是在上方的吗)
+
+#### r = m = n
+
+```{julia}
+using RowEchelon, Latexify, LinearAlgebra
+
+A = Rational{Int}[
+    1 2
+    3 1
+]
+display(rank(A))
+display(rref(A))
+```
+
+#### [三种矩阵秩对应的行阶梯标准形](../appendices/8.qmd#三种矩阵秩对应的行阶梯标准形)
+
+  | 秩条件 $r$                  | 行最简形 $R$                                     | $Ax=b$ 解的情况                              |
+  | --------------------------- | ------------------------------------------------ | -------------------------------------------- |
+  | $r=m=n$                     | $R=I$                                            | 仅有 1 组解                                  |
+  | $r=n < m$                   | $R=\begin{bmatrix} I \\ O \end{bmatrix}$         | 无解（全 0 行的 b 也得是 0 才有解）或 唯一解 |
+  | $r=m < n$                   | $R=\begin{bmatrix} I & F \end{bmatrix}$          | 有无穷多解                                   |
+  | $r<m,\ r<n$（行列均不满秩） | $R=\begin{bmatrix} I & F \\ O & O \end{bmatrix}$ | 无解 或 无穷多解                             |
