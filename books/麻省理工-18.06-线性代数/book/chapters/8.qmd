@@ -17,7 +17,7 @@ import PythonCall
 
 ```{python}
 import sympy as sp
-from IPython.display import Math
+from IPython.display import Math, display
 
 A = sp.Matrix([
     [1, 2, 2, 2],
@@ -47,7 +47,7 @@ print("列空间维数（秩）：", col_basis_matrix.rank())
 
 ```{python}
 import sympy as sp
-from IPython.display import Latex, Markdown
+from IPython.display import Latex, Markdown, display
 
 b1, b2, b3 = sp.symbols("b1,b2,b3")
 
@@ -91,7 +91,7 @@ display("*A.rref(): ", *A.rref())
 
 ```{python}
 import sympy as sp
-from IPython.display import Math, Markdown
+from IPython.display import Math, Markdown, display
 
 # 构造增广矩阵 [A|b]
 aug = sp.Matrix([
@@ -167,7 +167,6 @@ R[2, :] .-= 2R[1, :]
 R[3, :] .-= 3R[1, :] .+ R[2, :]
 display(R)
 ```
-
 所以有解的条件就是 0 = b3-b2-b1
 
 ```{julia}
