@@ -1,0 +1,132 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```python
+#| echo: false
+#| output: false
+import sys
+
+repo_root = r"C:\Coding\reading_lab"
+if repo_root not in sys.path:
+    sys.path.insert(0, repo_root)
+
+from books.assets.reading_lab_display import display
+```
+
+# 线性相关性、基、维度
+
+[m < n 的矩阵不可能无解吗？](../appendices/9.qmd#m-n-的矩阵不可能无解吗)
+
+[未知数与方程数相等的一次方程怎么会无解呢？](../appendices/9.qmd#未知数与方程数相等的一次方程怎么会无解呢)
+
+[噢，我的误区可能是我假定它是满秩的了。是不是如果满秩肯定有唯一解，否则可能无解或无穷多解？](../appendices/9.qmd#噢我的误区可能是我假定它是满秩的了是不是如果满秩肯定有唯一解否则可能无解或无穷多解)
+
+[那 m<n 的秩有可能小于 m 吗？它也有可能无解吗？](../appendices/9.qmd#那-mn-的秩有可能小于-m-吗它也有可能无解吗)
+
+## Independent
+
+[噢，所谓的线性无关确实在图像上它们是不在一条直线上的，也就说它们的斜率是一样的？那如果是倍数的我还好理解，如果是复杂线性组合出来的怎么理解呢？](../appendices/9.qmd#噢所谓的线性无关确实在图像上它们是不在一条直线上的也就说它们的斜率是一样的那如果是倍数的我还好理解如果是复杂线性组合出来的怎么理解呢)
+
+[噢，我知道了倍数只存在两个相量，如果三个向量的话前两个已经张成了一个平面了，所以第三个向量不只是共线，只要是共面就不独立了，就在这一个平面来说对第三个向量的要求就只是倍数了，因为倍数只是共线，所以不只可以倍数，还可以加减向量画出整个平面都可以](../appendices/9.qmd#噢我知道了倍数只存在两个相量如果三个向量的话前两个已经张成了一个平面了所以第三个向量不只是共线只要是共面就不独立了就在这一个平面来说对第三个向量的要求就只是倍数了因为倍数只是共线所以不只可以倍数还可以加减向量画出整个平面都可以)
+
+```{julia}
+using RowEchelon, Latexify, LinearAlgebra
+
+A = [
+    2 1 2.5
+    1 2 -1
+]
+
+N = nullspace(A)
+display(N)
+```
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from IPython.display import Markdown
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [2, 1, 2.5],
+    [1, 2, -1],
+])
+
+display(A.nullspace())
+```
+
+They are independent if nullspace is Zero Vector.
+rank = n
+N(A) = {0}
+
+They are dependent if Ac=0 for some none-zero vector c in the null space.
+rank < n
+yes free variable
+
+## [Span](../appendices/9.qmd#span)
+
+Vectors \(v_1,\dots,v_k\) span a space means:
+
+The space consists of all combinations of these vectors.
+
+## Basis
+
+[那基就是主元列吗？](../appendices/9.qmd#那基就是主元列吗)
+
+[julia 和 sympy 有直接找基的函数吗？](../appendices/9.qmd#julia-和-sympy-有直接找基的函数吗)
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from IPython.display import Markdown
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [1, 0, 0],
+    [0, 1, 0],
+    [0, 0, 1],
+])
+
+B = Matrix([
+    [1, 2, 3],
+    [1, 2, 3],
+    [2, 5, 8],
+])
+
+display("A.columnspace", *A.columnspace())
+display("A.nullspace", A.nullspace())
+display("B.columnspace", *B.columnspace())
+display("B.nullspace", B.nullspace())
+```
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [1, 2, 3, 1],
+    [1, 1, 2, 1],
+    [1, 2, 3, 1],
+])
+
+display("A.columnspace", *A.columnspace())
+display("A.nullspace", *A.nullspace())
+display("rank", A.rank())
+```
+
+[这一节我觉得不用看书了，明天可以直接看 lec 10 了](../appendices/9.qmd#这一节我觉得不用看书了明天可以直接看-lec-10-了)

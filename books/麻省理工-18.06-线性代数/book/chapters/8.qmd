@@ -12,7 +12,7 @@ julia:
 import PythonCall
 ```
 
-# Ax = b 可解性及解的结构
+# $Ax = b$ 可解性及解的结构
 
 ## python
 

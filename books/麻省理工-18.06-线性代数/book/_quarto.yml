@@ -15,6 +15,7 @@ book:
     - chapters/6.md
     - chapters/7.md
     - chapters/8.qmd
+    - chapters/9.qmd
     - chapters/c1.md
     - chapters/c2.md
   appendices:
@@ -22,6 +23,7 @@ book:
     - appendices/Echelon_form & RREF.md
     - appendices/7.md
     - appendices/8.md
+    - appendices/9.qmd
 
 number-depth: 2
 from: markdown+tex_math_single_backslash
