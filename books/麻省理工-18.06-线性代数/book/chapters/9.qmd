@@ -9,14 +9,10 @@ julia:
 ---
 
 ```{julia}
-#| include: false
-
 import PythonCall
 ```
 
 ```{python}
-#| include: false
-
 import sys
 from pathlib import Path
 
@@ -63,7 +59,6 @@ display(N)
 #| output: asis
 
 from sympy import Matrix
-from IPython.display import Markdown
 from books.assets.reading_lab_display import display
 
 A = Matrix([
@@ -98,7 +93,6 @@ The space consists of all combinations of these vectors.
 #| output: asis
 
 from sympy import Matrix
-from IPython.display import Markdown
 from books.assets.reading_lab_display import display
 
 A = Matrix([
