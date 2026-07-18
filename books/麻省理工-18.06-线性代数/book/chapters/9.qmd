@@ -9,12 +9,16 @@ julia:
 ---
 
 ```{julia}
+#| echo: false
+#| output: false
+
 import PythonCall
 ```
 
-```python
+```{python}
 #| echo: false
 #| output: false
+
 import sys
 
 repo_root = r"C:\Coding\reading_lab"
