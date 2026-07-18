@@ -15,7 +15,7 @@ julia:
 import PythonCall
 ```
 
-```{python}
+```python
 #| echo: false
 #| output: false
 
