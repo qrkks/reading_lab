@@ -9,21 +9,24 @@ julia:
 ---
 
 ```{julia}
-#| echo: false
-#| output: false
+#| include: false
 
 import PythonCall
 ```
 
-```python
-#| echo: false
-#| output: false
+```{python}
+#| include: false
 
 import sys
+from pathlib import Path
 
-repo_root = r"C:\Coding\reading_lab"
-if repo_root not in sys.path:
-    sys.path.insert(0, repo_root)
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
 
 from books.assets.reading_lab_display import display
 ```
