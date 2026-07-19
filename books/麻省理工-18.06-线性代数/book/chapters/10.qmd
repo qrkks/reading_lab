@@ -1,0 +1,196 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```
+
+# 四个基本空间
+
+## 4 Subspaces
+
+A is m × n
+
+- Column space $C(A)$ in $\mathbb{R}^m$
+- Null space $N(A)$ in $\mathbb{R}^n$
+- Row space $C(A^T)$ in $\mathbb{R}^n$
+- Null space of $A^T$ $N(A^T)$ in $\mathbb{R}^m$
+
+  | 空间                | 属于哪里        | 维度由谁决定 |
+  | ------------------- | --------------- | ------------ |
+  | 列空间 \(C(A)\)     | \(\mathbb R^m\) | rank \(r\)   |
+  | 零空间 \(N(A)\)     | \(\mathbb R^n\) | \(n-r\)      |
+  | 行空间 \(C(A^T)\)   | \(\mathbb R^n\) | rank \(r\)   |
+  | 左零空间 \(N(A^T)\) | \(\mathbb R^m\) | \(m-r\)      |
+
+[m*n 中零空间的维度是谁决定的？](../appendices/10.qmd#mn-中零空间的维度是谁决定的)
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [1, 2, 3],
+    [1, 2, 3],
+    [2, 5, 8],
+])
+
+display("rank", A.rank())
+display("A.columnspace", *A.columnspace())
+display("A.nullspace", *A.nullspace())
+display("A.rowspace", *A.rowspace())
+display("A.left_nullspace", *A.T.nullspace())
+```
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [1, 2, 3, 1],
+    [1, 1, 2, 1],
+    [1, 2, 3, 1],
+])
+R, _ = A.rref()
+C_A = A.columnspace()
+C_R = R.columnspace()
+N_A = A.nullspace()
+R_A = A.rowspace()
+R_R = R.rowspace()
+N_R = R.nullspace()
+
+display("rank", A.rank())
+display("rref", R)
+
+display("A.columnspace/C(A)/basis of A", *C_A)
+display("R.columnspace/R(C(A))/basis of R", *C_R)
+display("C(A)!=C(R)", C_A == C_R)
+
+display("A.rowspace", *R_A)
+display("R.rowspace", *R_R)
+display("A的行空间==R的行空间？", R_A == R_R)
+
+display("A.nullspace", *N_A)
+display("R.nullspace", *N_R)
+
+display("A.left_nullspace", *A.T.nullspace())
+```
+
+[是不是行线性相关就肯定列也线性相关？](../appendices/10.qmd#是不是行线性相关就肯定列也线性相关)
+
+[代码解析](../appendices/10.qmd#代码解析)
+
+[这四个空间有啥用啊？](../appendices/10.qmd#这四个空间有啥用啊)
+
+$$A^T y=0$$
+
+[这四个空间有啥用啊？](../appendices/10.qmd#这四个空间有啥用啊)
+
+被称为左零空间的原因：
+
+$$\Rightarrow [y^T][A]=[0]$$
+
+[y 的位置怎么变了](../appendices/10.qmd#y-的位置怎么变了)
+
+$$
+\operatorname{rref}\left[\begin{array}{c|c}
+A_{m\times n} & I_{m\times m}
+\end{array}\right]
+\longrightarrow
+\left[\begin{array}{c|c}
+R_{m\times n} & E_{m\times m}
+\end{array}\right]
+$$
+
+[这个 I 的作用就是记录变换步骤？](../appendices/10.qmd#这个-i-的作用就是记录变换步骤)
+
+$$
+E \left[\begin{array}{c|c} A_{m\times n} & I_{m\times m} \end{array}\right]
+\longrightarrow
+\left[\begin{array}{c|c} R_{m\times n} & E_{m\times m} \end{array}\right]
+$$
+
+[E 是什么意思，怎么又变成这样了？](../appendices/10.qmd#e-是什么意思怎么又变成这样了)
+
+$$EA=R$$
+
+In chapter 2, R is I.
+Then E was $A^{-1}$.
+
+[E 是怎么看来着？](../appendices/10.qmd#e-是怎么看来着)
+
+```{julia}
+using RowEchelon, Latexify, LinearAlgebra
+
+A = [
+    1 2 3 1
+    1 1 2 1
+    1 2 3 1
+]
+
+I3 = Matrix(I, 3, 3)
+
+AI = [A I3]
+
+R = copy(AI)
+R[2, :] .-= R[1, :]
+R[3, :] .-= R[1, :]
+R[2, :] .*= -1
+R[1, :] .-= 2R[2, :]
+display(latexify(R))
+```
+
+[julia 和 sympy 有直接求 E 的函数吗？](../appendices/10.qmd#julia-和-sympy-有直接求-e-的函数吗)
+
+```{python}
+#| output: asis
+
+from books.assets.reading_lab_display import display
+from sympy import Matrix, eye
+
+A = Matrix([
+    [1, 2, 3, 1],
+    [1, 1, 2, 1],
+    [1, 2, 3, 1],
+])
+
+R, E = A.rref_rhs(eye(A.rows))
+
+display(R)
+display(E)
+display(E * A)
+display(E * A == R)
+```
+
+[rref_rhs 是什么？](../appendices/10.qmd#rref_rhs-是什么)
+
+[E 就是 y 吗？还是$y^T$?](../appendices/10.qmd#e-就是-y-吗还是yt)
+
+[那左零空间的基就是 E 里的 m-r 里的行？](../appendices/10.qmd#那左零空间的基就是-e-里的-m-r-里的行)
+
+[这些行不一定是都在下面的，也可能是散着的？否！](../appendices/10.qmd#这些行不一定是都在下面的也可能是散着的)

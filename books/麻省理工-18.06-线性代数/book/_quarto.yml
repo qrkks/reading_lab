@@ -16,6 +16,7 @@ book:
     - chapters/7.md
     - chapters/8.qmd
     - chapters/9.qmd
+    - chapters/10.qmd
     - chapters/c1.md
     - chapters/c2.md
   appendices:
@@ -24,6 +25,7 @@ book:
     - appendices/7.md
     - appendices/8.md
     - appendices/9.qmd
+    - appendices/10.md
 
 number-depth: 2
 from: markdown+tex_math_single_backslash
