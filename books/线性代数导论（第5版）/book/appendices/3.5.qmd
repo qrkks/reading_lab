@@ -1,0 +1,450 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```
+
+# sympy 怎么算特殊解来着？
+
+SymPy 里求特解（particular solution）可以用 `gauss_jordan_solve()`，再把所有自由参数设为 0。
+
+```{python}
+from sympy import Matrix
+
+A = Matrix([
+    [1, 1, 1, 3],
+    [1, 2, -1, 4],
+])
+
+b = Matrix([3, 4])
+
+solution, parameters = A.gauss_jordan_solve(b)
+
+display(solution)
+display(parameters)
+```
+
+`solution` 是带自由参数的通解（general solution）。求一个最简单的特解：
+
+```python
+xp = solution.subs({p: 0 for p in parameters})
+
+display(xp)
+```
+
+完整写法：
+
+```python
+from sympy import Matrix
+
+A = Matrix([
+    [1, 1, 1, 3],
+    [1, 2, -1, 4],
+])
+
+b = Matrix([3, 4])
+
+solution, parameters = A.gauss_jordan_solve(b)
+
+xp = solution.subs({parameter: 0 for parameter in parameters})
+
+print("通解：")
+display(solution)
+
+print("自由参数：")
+display(parameters)
+
+print("特解：")
+display(xp)
+
+print("验证 A*xp：")
+display(A * xp)
+```
+
+这里算出的特解是：
+
+$$
+x_p=
+\begin{bmatrix}
+2\\
+1\\
+0\\
+0
+\end{bmatrix}
+$$
+
+并且：
+
+```python
+A * xp == b
+```
+
+会得到：
+
+```python
+True
+```
+
+核心就这一句：
+
+```python
+xp = solution.subs({p: 0 for p in parameters})
+```
+
+含义是：**把通解中的所有自由变量（free variables）设为 0，得到一个特解。**
+
+# 怎么算特殊解？
+
+在 SymPy 里，特殊解（special solutions）直接用 `nullspace()`：
+
+```python
+from sympy import Matrix
+
+A = Matrix([
+    [1, 1, 1, 3],
+    [1, 2, -1, 4],
+])
+
+special_solutions = A.nullspace()
+
+for s in special_solutions:
+    display(s)
+```
+
+结果是两个特殊解：
+
+$$
+s_1=
+\begin{bmatrix}
+-3\\
+2\\
+1\\
+0
+\end{bmatrix},
+\qquad
+s_2=
+\begin{bmatrix}
+-2\\
+-1\\
+0\\
+1
+\end{bmatrix}.
+$$
+
+因为这个矩阵有两个自由变量（free variables）\(x_3,x_4\)：
+
+- 求 \(s_1\)：令 \(x_3=1,\ x_4=0\)；
+- 求 \(s_2\)：令 \(x_3=0,\ x_4=1\)。
+
+验证：
+
+```python
+for s in special_solutions:
+    display(A * s)
+```
+
+都会得到零向量。
+
+## 得到零空间解 \(x_n\)
+
+特殊解是零空间（null space）的基向量，一般零空间解是它们的线性组合：
+
+```python
+from sympy import symbols
+
+c1, c2 = symbols("c1 c2")
+
+xn = c1 * special_solutions[0] + c2 * special_solutions[1]
+
+display(xn)
+```
+
+也就是：
+
+$$
+x_n
+=
+c_1
+\begin{bmatrix}
+-3\\
+2\\
+1\\
+0
+\end{bmatrix}
++
+c_2
+\begin{bmatrix}
+-2\\
+-1\\
+0\\
+1
+\end{bmatrix}.
+$$
+
+所以最核心的一句就是：
+
+```python
+special_solutions = A.nullspace()
+```
+
+`nullspace()` 返回的是**特殊解组成的列表**；这些特殊解的任意线性组合才是一般的 \(x_n\)。
+
+# 特解就是看高斯若尔丹通解的常数项？
+
+对，**特解（particular solution）\(x_p\)** 可以理解成：
+
+> 把高斯–若尔当消元（Gauss–Jordan elimination）得到的通解中，所有自由参数设为 \(0\)，剩下的常数项向量就是一个特解。
+
+例如通解是：
+
+$$
+x=
+\begin{bmatrix}
+2-3s-2t\\
+1+2s-t\\
+s\\
+t
+\end{bmatrix}
+$$
+
+可以拆成：
+
+$$
+x=
+\underbrace{
+\begin{bmatrix}
+2\\
+1\\
+0\\
+0
+\end{bmatrix}}_{x_p}
++
+s
+\underbrace{
+\begin{bmatrix}
+-3\\
+2\\
+1\\
+0
+\end{bmatrix}}_{s_1}
++
+t
+\underbrace{
+\begin{bmatrix}
+-2\\
+-1\\
+0\\
+1
+\end{bmatrix}}_{s_2}.
+$$
+
+因此：
+
+- **常数项向量**是特解 \(x_p\)；
+- 参数前面的向量是特殊解（special solutions）\(s_1,s_2\)；
+- 参数部分的任意线性组合是零空间解（null-space solution）\(x_n\)。
+
+也就是：
+
+$$
+x=x_p+x_n.
+$$
+
+在 SymPy 中：
+
+```python
+solution, parameters = A.gauss_jordan_solve(b)
+
+xp = solution.subs({p: 0 for p in parameters})
+```
+
+这一步本质上就是“取通解的常数项”。
+
+# 那 Ax=0 有特解吗？
+
+有。对于齐次方程（homogeneous equation）
+
+$$
+Ax=0,
+$$
+
+把所有自由变量（free variables）都设为 \(0\)，得到的特解（particular solution）就是：
+
+$$
+x_p=0.
+$$
+
+因为无论 \(A\) 是什么矩阵：
+
+$$
+A0=0.
+$$
+
+但这里通常不强调 \(x_p\)，因为它只是零向量。齐次方程真正关注的是零空间解（null-space solution）：
+
+$$
+x=x_n.
+$$
+
+分两种情况：
+
+- 没有自由变量：只有零解（trivial solution）\(x=0\)；
+- 有自由变量：除零解外，还有非零解，并可由特殊解（special solutions）生成。
+
+例如：
+
+$$
+x_1+x_2=0
+$$
+
+通解为：
+
+$$
+x=
+t
+\begin{bmatrix}
+-1\\
+1
+\end{bmatrix}.
+$$
+
+其中：
+
+- \(t=0\) 得到特解 \(x_p=0\)；
+- \(\begin{bmatrix}-1\\1\end{bmatrix}\) 是特殊解；
+- 所有 \(t\begin{bmatrix}-1\\1\end{bmatrix}\) 构成 \(x_n\)。
+
+所以可以记成：
+
+> 对 \(Ax=0\)，特解 \(x_p\) 是零向量；通解完全就是零空间解 \(x_n\)。
+
+# 从 rref 怎么看特殊解？
+
+可以直接按“**自由列取负，塞进主元位置；自由变量自己的位置放 1**”来看。
+
+你的
+
+$$
+R=
+\begin{bmatrix}
+1&3&5&0&7\\
+0&0&0&1&2\\
+0&0&0&0&0
+\end{bmatrix}
+$$
+
+主元列（pivot columns）是第 1、4 列，自由列（free columns）是第 2、3、5 列。
+
+## 看第 2 个自由列
+
+第 2 列在非零行中的数字是：
+
+$$
+\begin{bmatrix}
+3\\
+0
+\end{bmatrix}.
+$$
+
+取相反数，分别放到主元变量 \(x_1,x_4\) 的位置：
+
+$$
+x_1=-3,\qquad x_4=0.
+$$
+
+同时第 2 个自由变量 \(x_2=1\)，其他自由变量为 0：
+
+$$
+s_1=
+\begin{bmatrix}
+-3\\
+1\\
+0\\
+0\\
+0
+\end{bmatrix}.
+$$
+
+## 看第 3 个自由列
+
+第 3 列是：
+
+$$
+\begin{bmatrix}
+5\\
+0
+\end{bmatrix}.
+$$
+
+取负后放入主元位置，第 3 个位置放 1：
+
+$$
+s_2=
+\begin{bmatrix}
+-5\\
+0\\
+1\\
+0\\
+0
+\end{bmatrix}.
+$$
+
+## 看第 5 个自由列
+
+第 5 列是：
+
+$$
+\begin{bmatrix}
+7\\
+2
+\end{bmatrix}.
+$$
+
+取负后放在第 1、4 个主元位置，第 5 个位置放 1：
+
+$$
+s_3=
+\begin{bmatrix}
+-7\\
+0\\
+0\\
+-2\\
+1
+\end{bmatrix}.
+$$
+
+所以你可以直接记成：
+
+> 每个自由列产生一个特殊解（special solution）：  
+> 自由列里的数取负，放到主元位置；该自由变量位置放 \(1\)，其他自由变量位置放 \(0\)。
+
+原因就是行最简形里主元列组成单位矩阵，所以：
+
+$$
+x_{\text{pivot}}
+=
+-(\text{自由列})x_{\text{free}}.
+$$

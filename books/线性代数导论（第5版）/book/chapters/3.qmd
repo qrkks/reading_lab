@@ -12,6 +12,21 @@ julia:
 import PythonCall
 ```
 
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```
+
 # 向量空间与子空间
 
 ## 向量空间
@@ -192,7 +207,7 @@ display(A.rref())
 from sympy import Matrix
 from IPython.display import Markdown
 
-# 定义A
+# 定义 A
 A = Matrix([
     [1, 2],
     [3, 8],
@@ -448,7 +463,7 @@ display("gauss jordan solve", solution, parameters)
 
 particular = solution.subs({
     p: 0 for p in parameters
-})  # 这是个字典推导式，字典里的每个键p都换成0
+})  # 这是个字典推导式，字典里的每个键 p 都换成 0
 # 相当于：
 # particular = solution.subs({
 #     tau0: 0,
@@ -687,3 +702,64 @@ display(md("得到 ``[R d]``"))
 [xp 的维度](../appendices/3.3.qmd#xp-的维度)
 
 [解空间](../appendices/3.3.qmd#解空间)
+
+## 线性无关、基与维数
+
+（略）
+
+## 四个子空间的维数
+
+### 矩阵的四个子空间
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+from sympy import zeros
+
+R = Matrix([
+    [1, 3, 5, 0, 7],
+    [0, 0, 0, 1, 2],
+    [0, 0, 0, 0, 0],
+])
+
+print(f"m={R.rows}")
+print(f"n={R.cols}")
+print(f"r={R.rank()}")
+display("特殊解", *R.nullspace())
+display(
+    R.gauss_jordan_solve(zeros(R.rows, 1))[0]
+)  # 我发现 Ax=0 的通解每个 tau 代入 1，其它代入 0 就是零解，这与零空间的算法是一样的；它的特解也可视为是 0。
+```
+
+[sympy 怎么算特殊解来着？](../appendices/3.5.qmd#sympy-怎么算特殊解来着)
+
+[怎么算特殊解？](../appendices/3.5.qmd#怎么算特殊解)
+
+[那 Ax=0 有特解吗？](../appendices/3.5.qmd#那-ax0-有特解吗)
+
+[从 rref 怎么看特殊解？](../appendices/3.5.qmd#从-rref-怎么看特殊解)
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+RT = R.T
+display(RT)
+display("RT的rref", *RT.rref())
+```
+
+左零空间各行的线性组合等于零
+
+\[
+\begin{array}{r}
+y_1\begin{bmatrix} 1 & 3 & 5 & 0 & 7 \end{bmatrix} \\
++\,y_2\begin{bmatrix} 0 & 0 & 0 & 1 & 2 \end{bmatrix} \\
++\,y_3\begin{bmatrix} 0 & 0 & 0 & 0 & 0 \end{bmatrix} \\
+\hline
+\begin{bmatrix} 0 & 0 & 0 & 0 & 0 \end{bmatrix}
+\end{array}
+\]
