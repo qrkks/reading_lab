@@ -27,7 +27,9 @@ if str(repo_root) not in sys.path:
 from books.assets.reading_lab_display import display
 ```
 
-# 什么叫标准基
+# 11
+
+## 什么叫标准基
 
 标准基（**standard basis**）就是一个坐标空间里，最自然的那组基向量：**每个向量只有一个位置是 1，其余位置全是 0。**
 
@@ -145,7 +147,7 @@ $$
 
 也构成一组基，但它们不是标准基，因为它们不是“一个位置为 1、其余为 0”的形式。
 
-# 如何在 rref 上看出特殊解
+## 如何在 rref 上看出特殊解
 
 就是看简化行阶梯形（**RREF**）里的自由列（**free columns**）。
 
@@ -164,7 +166,7 @@ $$
 - \(x_1,x_3\) 是主元变量（pivot variables）
 - \(x_2,x_4\) 是自由变量（free variables）
 
-## 看第 2 列
+### 看第 2 列
 
 第 2 列是自由列：
 
@@ -193,7 +195,7 @@ s_1=
 \end{bmatrix}
 $$
 
-## 看第 4 列
+### 看第 4 列
 
 第 4 列是：
 

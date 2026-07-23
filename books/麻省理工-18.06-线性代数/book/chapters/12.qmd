@@ -1,0 +1,71 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```
+
+# 图和网络
+
+## Graph: nodes, Edge
+
+[Incidence Matrix 是什么？](../appendices/12.qmd#incidence-matrix-是什么)
+
+[与 DAG 有关系吗？](../appendices/12.qmd#与-dag-有关系吗)
+
+[Strang 讲的的好像列是 node，行是 edge](../appendices/12.qmd#strang-讲的的好像列是-node行是-edge)
+
+[这图咋感觉与建筑的网络图也有点像](../appendices/12.qmd#这图咋感觉与建筑的网络图也有点像)
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [-1, 1, 0, 0],
+    [0, -1, 1, 0],
+    [-1, 0, 1, 0],
+    [-1, 0, 0, 1],
+    [0, 0, -1, 1],
+])
+
+display("R(A)", *A.rowspace())
+display("N(A)", *A.nullspace())
+display("A.T", A.T)
+display("N(A.T)", *A.T.nullspace())
+```
+[什么是 potentials at nodes](../appendices/12.qmd#什么是-potentials-at-nodes)
+
+[我靠，线性代数是不是完全就是工程落地用的](../appendices/12.qmd#我靠线性代数是不是完全就是工程落地用的)
+
+[我愿称之为最重要的数学，没有之一。](../appendices/12.qmd#我愿称之为最重要的数学没有之一)
+
+#nodes - #edges + #loops = 1
+
+[`#nodes - #edges + #loops = 1` 这是什么意思？](../appendices/12.qmd#nodes-edges-loops-1-这是什么意思)
+
+[平衡方程是什么？](../appendices/12.qmd#平衡方程是什么)
