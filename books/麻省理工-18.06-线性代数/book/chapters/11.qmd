@@ -1,0 +1,48 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```
+
+# 新型向量空间的基、秩 1 矩阵和小世界图
+
+[什么叫标准基](../appendices/11.qmd#什么叫标准基)
+
+[如何在 rref 上看出特殊解](../appendices/11.qmd#如何在-rref-上看出特殊解)
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([[1, 1, 1, 1]])
+
+display("A.nullspace", *A.nullspace())
+display("A.columnspace", *A.columnspace())
+display("A.rowspace", *A.rowspace())
+display("A.T.nullspace", A.T.nullspace())
+```
