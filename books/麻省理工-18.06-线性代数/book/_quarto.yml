@@ -18,6 +18,8 @@ book:
     - chapters/9.qmd
     - chapters/10.qmd
     - chapters/11.qmd
+    - chapters/12.qmd
+    - chapters/13.qmd
     - chapters/c1.md
     - chapters/c2.md
   appendices:
@@ -28,6 +30,8 @@ book:
     - appendices/9.qmd
     - appendices/10.qmd
     - appendices/11.qmd
+    - appendices/12.qmd
+    - appendices/13.qmd
 
 number-depth: 2
 from: markdown+tex_math_single_backslash

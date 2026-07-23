@@ -1,0 +1,57 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```
+
+```{python}
+#| output: asis
+
+from sympy import Matrix, Symbol
+from books.assets.reading_lab_display import display
+
+u = Symbol("u")
+
+B = Matrix([u, 2 * u])
+display("B.rref", *B.rref())
+
+C = Matrix([
+    [u, u],
+    [u, 0],
+])
+display("C.rref", *C.rref())
+```
+
+```{python}
+#| output: asis
+
+from sympy import Matrix, symbols
+from books.assets.reading_lab_display import display
+
+c, d = symbols("c,d")
+b = Matrix([2, 4, 2])
+x = Matrix([2, 0, 0]) + c * Matrix([1, 1, 0]) + d * Matrix([0, 0, 1])
+```

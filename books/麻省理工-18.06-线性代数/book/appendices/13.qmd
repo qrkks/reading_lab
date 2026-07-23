@@ -1,0 +1,28 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```

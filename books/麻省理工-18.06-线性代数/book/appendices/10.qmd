@@ -1,4 +1,18 @@
-```{python}
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```julia
+import PythonCall
+```
+
+```python
 import sys
 from pathlib import Path
 
@@ -327,7 +341,7 @@ $$
 
 你写：
 
-```{python}
+```python
 from sympy import Matrix
 from books.assets.reading_lab_display import display
 
@@ -400,7 +414,7 @@ $$
 
 所以：
 
-```{python}
+```python
 A.columnspace()
 ```
 
@@ -412,7 +426,7 @@ A.columnspace()
 
 你这里：
 
-```{python}
+```python
 A.rowspace()
 R.rowspace()
 ```
@@ -468,7 +482,7 @@ $$
 
 你的：
 
-```{python}
+```python
 N_A = A.nullspace()
 N_R = R.nullspace()
 ```
@@ -519,7 +533,7 @@ $$
 
 你最后：
 
-```{python}
+```python
 A.T.nullspace()
 ```
 
@@ -563,7 +577,7 @@ $$
 
 你这个 notebook 如果继续完善，我建议加一行：
 
-```{python}
+```python
 display("rank-nullity check", A.rank() + len(N_A))
 ```
 
@@ -587,7 +601,7 @@ $$
 
 另外加：
 
-```{python}
+```python
 R_A = A.columnspace()
 display("row rank", len(R_A))
 display("column rank", len(C_A))
@@ -1397,7 +1411,7 @@ $$
 [A\mid I]\longrightarrow[R\mid E]
 $$
 
-```{python}
+```python
 from sympy import Matrix, eye
 
 A = Matrix([
@@ -1439,7 +1453,7 @@ $$
 
 `RowEchelon.jl` 目前主要提供：
 
-```{julia}
+```julia
 rref(A)
 rref!(A)
 ```
@@ -1448,7 +1462,7 @@ rref!(A)
 
 因此这样写：
 
-```{julia}
+```julia
 using RowEchelon, LinearAlgebra
 
 A = Rational{Int}.(
@@ -1476,7 +1490,7 @@ display(E * A == R)
 
 也可以封装成函数：
 
-```{julia}
+```julia
 function rref_with_E(A)
     A = Rational{Int}.(A)
 
@@ -1518,7 +1532,7 @@ SymPy 官方定义是：返回矩阵的行最简形，以及 `rhs` 经过相同�
 
 例如：
 
-```{python}
+```python
 R, c = A.rref_rhs(b)
 ```
 
@@ -1556,7 +1570,7 @@ $$
 
 写成：
 
-```{python}
+```python
 R, E = A.rref_rhs(eye(A.rows))
 ```
 
@@ -1582,7 +1596,7 @@ $$
 
 你这段代码最清楚：
 
-```{python}
+```python
 from sympy import Matrix, eye
 
 A = Matrix([
@@ -1895,12 +1909,12 @@ $$
 
 你现在用 SymPy 的 `rref_rhs()`，返回的是标准 rref，所以直接取：
 
-```{python}
+```python
 E[r:, :]
 ```
 
 就是对应的 \(m-r\) 行。若要得到左零空间常用的列向量形式：
 
-```{python}
+```python
 left_null_basis = [E.row(i).T for i in range(r, A.rows)]
 ```
