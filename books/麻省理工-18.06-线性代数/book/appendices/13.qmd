@@ -26,3 +26,485 @@ if str(repo_root) not in sys.path:
 
 from books.assets.reading_lab_display import display
 ```
+
+# 13
+
+# 怎么求 A？
+
+你这个问题其实是在**反过来求矩阵 \(A\)**：
+
+已知：
+
+\[
+x=x_p+c u+d v
+\]
+
+并且：
+
+\[
+Ax=b
+\]
+
+其中：
+
+\[
+x_p=
+\begin{bmatrix}
+2\\0\\0
+\end{bmatrix},
+\quad
+u=
+\begin{bmatrix}
+1\\1\\0
+\end{bmatrix},
+\quad
+v=
+\begin{bmatrix}
+0\\0\\1
+\end{bmatrix}
+\]
+
+说明：
+
+- \(x_p\) 是特解（particular solution）
+- \(u,v\) 是零空间（null space）的基
+
+因为所有解：
+
+\[
+x=x_p+N(A)
+\]
+
+所以：
+
+\[
+Au=0
+\]
+
+\[
+Av=0
+\]
+
+同时：
+
+\[
+Ax_p=b
+\]
+
+---
+
+设：
+
+\[
+A=
+\begin{bmatrix}
+a&b&c\\
+d&e&f\\
+g&h&i
+\end{bmatrix}
+\]
+
+## 条件 1：\(Au=0\)
+
+\[
+A
+\begin{bmatrix}
+1\\1\\0
+\end{bmatrix}
+=
+\begin{bmatrix}
+a+b\\d+e\\g+h
+\end{bmatrix}
+=
+0
+\]
+
+所以：
+
+\[
+a+b=0
+\]
+
+\[
+d+e=0
+\]
+
+\[
+g+h=0
+\]
+
+---
+
+## 条件 2：\(Av=0\)
+
+\[
+A
+\begin{bmatrix}
+0\\0\\1
+\end{bmatrix}
+=
+\begin{bmatrix}
+c\\f\\i
+\end{bmatrix}
+=0
+\]
+
+所以：
+
+\[
+c=f=i=0
+\]
+
+现在矩阵变成：
+
+\[
+A=
+\begin{bmatrix}
+a&-a&0\\
+d&-d&0\\
+g&-g&0
+\end{bmatrix}
+\]
+
+---
+
+## 条件 3：\(Ax_p=b\)
+
+\[
+A
+\begin{bmatrix}
+2\\0\\0
+\end{bmatrix}
+=
+2
+\begin{bmatrix}
+a\\d\\g
+\end{bmatrix}
+=
+\begin{bmatrix}
+2\\4\\2
+\end{bmatrix}
+\]
+
+所以：
+
+\[
+a=1
+\]
+
+\[
+d=2
+\]
+
+\[
+g=1
+\]
+
+因此：
+
+\[
+\boxed{
+A=
+\begin{bmatrix}
+1&-1&0\\
+2&-2&0\\
+1&-1&0
+\end{bmatrix}
+}
+\]
+
+---
+
+用 SymPy 可以这样验证：
+
+```python
+from sympy import Matrix
+
+A = Matrix([[1, -1, 0], [2, -2, 0], [1, -1, 0]])
+
+x = Matrix([2, 0, 0]) + c * Matrix([1, 1, 0]) + d * Matrix([0, 0, 1])
+
+A * x
+```
+
+会得到：
+
+\[
+\begin{bmatrix}
+2\\4\\2
+\end{bmatrix}
+\]
+
+---
+
+这个例子其实就是 Strang 讲的核心思想：
+
+\[
+\text{solution set}=x_p+N(A)
+\]
+
+也就是：
+
+- \(x_p\) 决定右侧 \(b\)；
+- null space 决定所有可以“自由移动”的方向；
+- 矩阵 \(A\) 把这些自由方向全部压成 0。
+
+所以你现在是在用**解空间反推矩阵**，这比单纯解方程更接近线性代数的本质。
+
+# 能直接用 sympy 解吗？
+
+可以，直接让 SymPy 解这个矩阵未知量问题。
+
+思路是把：
+
+\[
+A x_p=b
+\]
+
+以及：
+
+\[
+A u=0,\quad A v=0
+\]
+
+全部转成方程。
+
+```python
+from sympy import Matrix, symbols, solve
+
+# 未知矩阵元素
+a11, a12, a13, a21, a22, a23, a31, a32, a33 = symbols(
+    "a11 a12 a13 a21 a22 a23 a31 a32 a33"
+)
+
+A = Matrix([[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]])
+
+xp = Matrix([2, 0, 0])
+u = Matrix([1, 1, 0])
+v = Matrix([0, 0, 1])
+b = Matrix([2, 4, 2])
+
+eqs = list(A * xp - b) + list(A * u) + list(A * v)
+
+sol = solve(eqs, [a11, a12, a13, a21, a22, a23, a31, a32, a33])
+
+sol
+```
+
+输出：
+
+```python
+{a11: 1, a12: -1, a13: 0, a21: 2, a22: -2, a23: 0, a31: 1, a32: -1, a33: 0}
+```
+
+然后：
+
+```python
+A.subs(sol)
+```
+
+得到：
+
+\[
+\begin{bmatrix}
+1&-1&0\\
+2&-2&0\\
+1&-1&0
+\end{bmatrix}
+\]
+
+---
+
+不过这个例子还有一个更线性的写法：
+
+因为：
+
+$$
+N(A)=span
+\left\{
+\begin{bmatrix}1\\1\\0\end{bmatrix},
+\begin{bmatrix}0\\0\\1\end{bmatrix}
+\right\}
+$$
+
+所以 \(A\) 的行空间（row space）必须垂直于这两个向量。
+
+找一个行向量：
+
+\[
+r=[p,q,r]
+\]
+
+满足：
+
+$$
+r
+\begin{bmatrix}1\\1\\0\end{bmatrix}=0
+$$
+
+$$
+r
+\begin{bmatrix}0\\0\\1\end{bmatrix}=0
+$$
+
+得到：
+
+\[
+p+q=0,\quad r=0
+\]
+
+所以每一行都是：
+
+\[
+[k,-k,0]
+\]
+
+再由：
+
+\[
+Ax_p=b
+\]
+
+确定三个 \(k\)。
+
+这个就是 Strang 反复强调的：
+
+\[
+N(A)\perp C(A^T)
+\]
+
+也就是：
+
+> 零空间（null space）决定了矩阵行空间（row space）的方向。
+
+你现在这个例子其实已经碰到第四个基本子空间的关系了。
+
+# 特解有如果有 1，那就是有某一列啊
+
+对，你这个理解**有一个特殊情况是对的**，但要加一个限定：
+
+> **如果特解 \(x_p\) 里面只有一个 1，其余都是 0，那么 \(Ax_p\) 就等于矩阵 \(A\) 的对应列。**
+
+因为：
+
+\[
+Ax=x_1a_1+x_2a_2+\cdots+x_na_n
+\]
+
+如果：
+
+\[
+x_p=
+\begin{bmatrix}
+0\\
+1\\
+0
+\end{bmatrix}
+\]
+
+那么：
+
+## Ax_p
+
+## 0a_1+1a_2+0a_3
+
+\[
+a_2
+\]
+
+所以：
+
+\[
+\boxed{Ax_p=\text{第 2 列}}
+\]
+
+---
+
+例如：
+
+\[
+A=
+\begin{bmatrix}
+1&3&5\\
+2&4&6
+\end{bmatrix}
+\]
+
+取：
+
+\[
+x_p=
+\begin{bmatrix}
+0\\1\\0
+\end{bmatrix}
+\]
+
+则：
+
+## Ax_p
+
+\[
+\begin{bmatrix}
+3\\4
+\end{bmatrix}
+\]
+
+就是第二列。
+
+---
+
+但是注意：
+
+你刚才那个例子：
+
+\[
+x_p=
+\begin{bmatrix}
+2\\0\\0
+\end{bmatrix}
+\]
+
+不是标准基向量（standard basis vector）。
+
+所以：
+
+\[
+Ax_p=2a_1
+\]
+
+不是 \(a_1\)。
+
+如果：
+
+\[
+x_p=
+\begin{bmatrix}
+1\\1\\0
+\end{bmatrix}
+\]
+
+那么：
+
+\[
+Ax_p=a_1+a_2
+\]
+
+是两列相加。
+
+---
+
+所以更准确地说：
+
+- \(x_p=e_i\)（某个标准基向量 standard basis vector）  
+  → \(Ax_p\) 是 \(A\) 的第 \(i\) 列。
+
+- \(x_p\) 是普通向量  
+  → \(Ax_p\) 是 \(A\) 的列向量的线性组合。
+
+这其实就是为什么 Strang 一直强调：
+
+\[
+Ax=\text{columns of }A\text{ combined by }x
+\]
+
+因为 \(x\) 本质就是“列空间里的配方”。你现在已经把“解向量”和“列向量”的联系抓到了。

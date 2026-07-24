@@ -27,6 +27,8 @@ if str(repo_root) not in sys.path:
 from books.assets.reading_lab_display import display
 ```
 
+# 复习一
+
 ```{python}
 #| output: asis
 
@@ -54,4 +56,42 @@ from books.assets.reading_lab_display import display
 c, d = symbols("c,d")
 b = Matrix([2, 4, 2])
 x = Matrix([2, 0, 0]) + c * Matrix([1, 1, 0]) + d * Matrix([0, 0, 1])
+
+# 验证
+A = Matrix([
+    [1, -1, 0],
+    [2, -2, 0],
+    [1, -1, 0],
+])
+
+print(A * x == b)
+```
+
+[怎么求 A？](../appendices/13.qmd#怎么求-a)
+
+[能直接用 sympy 解吗？](../appendices/13.qmd#能直接用-sympy-解吗)
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+B = Matrix([
+    [1, 1, 0],
+    [0, 1, 0],
+    [1, 0, 1],
+]) * Matrix([
+    [1, 0, -1, 2],
+    [0, 1, 1, -1],
+    [0, 0, 0, 0],
+])
+display(*B.nullspace())
+```
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
 ```
