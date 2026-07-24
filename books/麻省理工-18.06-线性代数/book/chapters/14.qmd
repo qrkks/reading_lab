@@ -1,0 +1,110 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```
+
+# 正交向量和正交子空间
+
+[怎么用代码算一个向量的范数？](../appendices/14.qmd#怎么用代码算一个向量的范数)
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+x = Matrix([1, 2, 3])
+y = Matrix([2, -1, 0])
+
+display("x.norm", x.norm())
+display("x.norm 1", x.norm(1))
+display("x.norm < x.norm 1", x.norm() < x.norm(1))
+display("y.norm", y.norm())
+display("y.norm 1", y.norm(1))
+
+display("x+y", x + y)
+display("(x+y).norm", (x + y).norm())
+
+display("x.T*x", x.T * x)
+```
+
+[一范数是曼哈顿距离。二范数是欧几里得距离，二范数永远小于等于一范数。](../appendices/14.qmd#一范数是曼哈顿距离二范数是欧几里得距离二范数永远小于等于一范数)
+
+[点积是针对向量的吗？矩阵有没有点积？](../appendices/14.qmd#点积是针对向量的吗矩阵有没有点积)
+
+[那它既不是向量，也不是矩阵，它怎么算点积啊？甚至内积也不能算呀？那怎么知道它们是正交的？](../appendices/14.qmd#那它既不是向量也不是矩阵它怎么算点积啊甚至内积也不能算呀那怎么知道它们是正交的)
+
+正交补
+
+[行空间和零空间的总维数是总空间的维数。那就相当于说，在三维空间里，一个是平面，另一个就得是直线。](../appendices/14.qmd#行空间和零空间的总维数是总空间的维数那就相当于说在三维空间里一个是平面另一个就得是直线)
+
+[这就是正交补的意思吗？](../appendices/14.qmd#这就是正交补的意思吗)
+
+[哦，那他们所有的任意向量都是正交的。实际上在图像上，就是从某子空间原点伸出来的箭头，肯定另一个子空间上原点伸出来的箭头是正交的呀。](../appendices/14.qmd#哦那他们所有的任意向量都是正交的实际上在图像上就是从某子空间原点伸出来的箭头肯定另一个子空间上原点伸出来的箭头是正交的呀)
+
+[那意思就是两个正交的子空间里面分别随便画箭头都是正交的吗？](../appendices/14.qmd#那意思就是两个正交的子空间里面分别随便画箭头都是正交的吗)
+
+[那正交基是什么？](../appendices/14.qmd#那正交基是什么)
+
+最小二乘法
+
+[最小二乘法的来源是为了解无解的方程组吗？](../appendices/14.qmd#最小二乘法的来源是为了解无解的方程组吗)
+
+[宽矩阵主要是讨论零空间，窄矩阵主要就是最小二乘法啰？](../appendices/14.qmd#宽矩阵主要是讨论零空间窄矩阵主要就是最小二乘法啰)
+
+$$A^T A \hat x=A^T b$$
+
+[$A^TAx=A^Tb$ 这个就是最小二乘法啊？](../appendices/14.qmd#ataxatb-这个就是最小二乘法啊)
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [1, 1],
+    [1, 2],
+    [1, 5],
+])
+display(A.T * A)
+display((A.T * A).det())
+display((A.T * A).rank())
+display(A.rank())
+
+A = Matrix([
+    [1, 3],
+    [1, 3],
+    [1, 3],
+])
+display(A.T * A)
+display((A.T * A).det())
+display((A.T * A).rank())
+display(A.rank())
+```
+
+[如何判断是否可逆？](../appendices/14.qmd#如何判断是否可逆)
