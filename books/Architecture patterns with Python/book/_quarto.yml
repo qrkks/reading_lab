@@ -1,0 +1,18 @@
+project:
+  type: book
+
+book:
+  title: "book"
+  author: "Norah Jones"
+  date: "2026/7/25"
+  chapters:
+    - index.qmd
+    - chapters/1.md
+
+from: markdown+tex_math_single_backslash
+
+format:
+  html:
+    # css: ../../../assets/main.css 这个只有放在自己的项目里才生效
+    include-in-header:
+      file: ../../assets/main-header.html
