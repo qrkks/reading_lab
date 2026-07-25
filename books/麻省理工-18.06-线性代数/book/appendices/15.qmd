@@ -1,0 +1,601 @@
+# 15
+
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```
+
+# $a^T \left(b - xa\right) = 0$是什么
+
+这是
+
+\[
+a^{T}(b-xa)=0
+\]
+
+它表达的是：**误差向量 \(b-xa\) 与向量 \(a\) 正交（orthogonal）**。
+
+其中：
+
+- \(a^T\)：向量 \(a\) 的转置
+- \(xa\)：用 \(a\) 的倍数去逼近 \(b\)
+- \(b-xa\)：残差（residual）
+- 等于 \(0\)：说明 \(a\) 与残差的点积为零
+
+展开：
+
+\[
+a^Tb-xa^Ta=0
+\]
+
+所以：
+
+\[
+\boxed{x=\frac{a^Tb}{a^Ta}}
+\]
+
+这就是把 \(b\) **投影（projection）到向量 \(a\) 所张成的直线**上时，投影系数 \(x\) 的计算公式。
+
+如果 \(a\) 是单位向量，即 \(a^Ta=1\)，那么：
+
+\[
+x=a^Tb
+\]
+
+# 不能约分吗？
+
+不能约分。因为这里的
+
+\[
+a^Tb,\qquad a^Ta
+\]
+
+都是**内积（inner product）**，不是普通的乘法因式。
+
+公式是：
+
+\[
+p=a\frac{a^Tb}{a^Ta}
+\]
+
+其中维度分别为：
+
+\[
+a\in\mathbb R^n,\quad a^T b\in\mathbb R,\quad a^Ta\in\mathbb R
+\]
+
+所以实际上是：
+
+\[
+\underbrace{p}_{向量}
+=
+\underbrace{a}_{向量}
+\cdot
+\underbrace{\left(\frac{a^Tb}{a^Ta}\right)}_{标量}
+\]
+
+你可能想把上面的 \(a^T\) 约掉：
+
+\[
+\frac{a^Tb}{a^Ta}\overset{?}{=}\frac ba
+\]
+
+但**向量没有这种除法**。而且 \(a^Tb\) 与 \(a^Ta\) 已经分别计算成两个数，\(a^T\) 不是它们的普通公因子。
+
+举个例子：
+
+\[
+a=
+\begin{bmatrix}
+1\\
+2
+\end{bmatrix},
+\qquad
+b=
+\begin{bmatrix}
+3\\
+4
+\end{bmatrix}
+\]
+
+则：
+
+\[
+a^Tb=1\cdot3+2\cdot4=11
+\]
+
+\[
+a^Ta=1^2+2^2=5
+\]
+
+因此：
+
+\[
+p=a\frac{11}{5}
+=
+\begin{bmatrix}
+11/5\\
+22/5
+\end{bmatrix}
+\]
+
+这里显然没有哪个 \(a\) 可以约掉。
+
+只有在一维情况下，\(a,b\) 都是普通标量时：
+
+\[
+a\frac{ab}{a^2}=b
+\]
+
+才可以约分。因为一维空间中整条数轴就是 \(\operatorname{span}(a)\)，所以 \(b\) 投影过去仍然是 \(b\)。在多维空间里，\(p\) 一般只是 \(b\) 在 \(a\) 方向上的投影。
+
+# $P = \frac{a a^T}{a^T a}$
+
+对，这个就是把向量投影到 \(\operatorname{span}(a)\) 上的**投影矩阵（projection matrix）**：
+
+\[
+\boxed{P=\frac{aa^T}{a^Ta}}
+\]
+
+因为原来的投影向量是
+
+\[
+p=a\frac{a^Tb}{a^Ta}
+\]
+
+把标量位置重新整理：
+
+\[
+p=\frac{aa^Tb}{a^Ta}
+=\left(\frac{aa^T}{a^Ta}\right)b
+\]
+
+于是：
+
+\[
+\boxed{p=Pb}
+\]
+
+其中
+
+\[
+\boxed{P=\frac{aa^T}{a^Ta}}
+\]
+
+---
+
+## 看一下维度
+
+设
+
+\[
+a\in\mathbb R^m
+\]
+
+那么：
+
+\[
+a:m\times1,\qquad a^T:1\times m
+\]
+
+所以
+
+\[
+aa^T:m\times m
+\]
+
+而
+
+\[
+a^Ta:1\times1
+\]
+
+是一个标量。因此：
+
+\[
+P=\frac{aa^T}{a^Ta}\in\mathbb R^{m\times m}
+\]
+
+它可以乘任意 \(b\in\mathbb R^m\)：
+
+\[
+p=Pb
+\]
+
+得到 \(b\) 在直线 \(\operatorname{span}(a)\) 上的投影。
+
+这里也不能约掉 \(a^T\)，因为：
+
+\[
+aa^T
+\]
+
+是一个矩阵，而
+
+\[
+a^Ta
+\]
+
+是一个标量，它们不是普通代数中带有相同因子的两个乘积。
+
+这个投影矩阵还有两个重要性质：
+
+\[
+P^T=P
+\]
+
+即它是**对称矩阵（symmetric matrix）**；
+
+\[
+P^2=P
+\]
+
+即投影一次以后再投影，结果不会改变，称为**幂等矩阵（idempotent matrix）**。
+
+# 投影是谁？是 p 还是 P
+
+严格来说：
+
+\[
+\boxed{p}
+\]
+
+是 **投影向量（projection vector）**，也就是 \(b\) 投影以后得到的具体结果。
+
+\[
+\boxed{P}
+\]
+
+是 **投影矩阵（projection matrix）**，它是执行投影这个操作的矩阵。
+
+两者关系是：
+
+\[
+\boxed{p=Pb}
+\]
+
+例如把 \(b\) 投影到 \(\operatorname{span}(a)\) 上：
+
+\[
+P=\frac{aa^T}{a^Ta}
+\]
+
+然后：
+
+\[
+p=Pb
+=\frac{aa^T}{a^Ta}b
+=a\frac{a^Tb}{a^Ta}
+\]
+
+可以这样记：
+
+- \(P\)：投影机器、投影规则；
+- \(b\)：送进去的原向量；
+- \(p\)：投影后得到的向量。
+
+所以别人说“求 \(b\) 的投影”，通常指求 \(p\)；说“求投影矩阵”，就是求 \(P\)。有时教材也会把 \(P\) 叫作 projection，但那是把“投影”理解为一个线性变换。
+
+# sympy 怎么算最小二乘
+
+SymPy 里算最小二乘（least squares）有几种方式。你现在学 MIT 18.06，最推荐直接用**正规方程（normal equation）**理解。
+
+假设：
+
+\[
+Ax=b
+\]
+
+求：
+
+\[
+\hat{x}=\arg\min_x\|Ax-b\|^2
+\]
+
+正规方程：
+
+\[
+A^TA\hat{x}=A^Tb
+\]
+
+---
+
+## 方法 1：直接解正规方程（最符合 Strang）
+
+```python
+from sympy import Matrix
+
+A = Matrix([[1, 1], [1, 2], [1, 3]])
+
+b = Matrix([1, 2, 2])
+
+x_hat = (A.T * A).inv() * A.T * b
+
+x_hat
+```
+
+输出：
+
+\[
+\begin{bmatrix}
+2/3\\
+1/2
+\end{bmatrix}
+\]
+
+这就是最小二乘解。
+
+---
+
+## 方法 2：用 solve 解正规方程（更推荐）
+
+因为实际不建议直接求逆：
+
+```python
+x1, x2 = symbols("x1 x2")
+
+x = Matrix([x1, x2])
+
+eq = A.T * A * x - A.T * b
+
+solve(eq, [x1, x2])
+```
+
+---
+
+## 方法 3：SymPy 自带 `QRsolve`
+
+最小二乘更稳定的方法其实是 QR 分解：
+
+```python
+A.QRsolve(b)
+```
+
+例如：
+
+```python
+x_hat = A.QRsolve(b)
+```
+
+它直接返回：
+
+\[
+\hat{x}
+\]
+
+这个更接近数值计算里的做法。
+
+---
+
+## 你现在学投影，其实最小二乘就是投影
+
+因为：
+
+\[
+A\hat{x}
+\]
+
+不是等于 \(b\)，而是：
+
+\[
+p=A\hat{x}
+\]
+
+其中：
+
+\[
+p
+\]
+
+是：
+
+\[
+b
+\]
+
+在列空间：
+
+\[
+C(A)
+\]
+
+上的投影。
+
+所以：
+
+\[
+b=A\hat{x}+e
+\]
+
+并且：
+
+\[
+A^Te=0
+\]
+
+也就是：
+
+\[
+\boxed{A^T(b-A\hat{x})=0}
+\]
+
+这就是正规方程。
+
+所以你刚学的投影矩阵：
+
+\[
+P=A(A^TA)^{-1}A^T
+\]
+
+马上就能得到：
+
+\[
+\boxed{p=Pb}
+\]
+
+这正是最小二乘的几何意义。你现在的位置刚好到了 18.06 最漂亮的一块：**正交投影 → 最小二乘 → 回归（regression）**。
+
+# `x_hat = (A.T * A).inv() * A.T * b` 我咋感觉这里还少了个 A？
+
+你这个感觉非常好，因为你刚看到的：
+
+\[
+P=A(A^TA)^{-1}A^T
+\]
+
+里面确实有一个 \(A\)，但是：
+
+\[
+\hat{x}=(A^TA)^{-1}A^Tb
+\]
+
+里面**没有少 \(A\)**。
+
+关键是要区分两个东西：
+
+---
+
+## 1. 最小二乘解是 \(\hat{x}\)
+
+我们求的是：
+
+\[
+A\hat{x}\approx b
+\]
+
+所以未知量是：
+
+\[
+\boxed{\hat{x}}
+\]
+
+正规方程：
+
+\[
+A^T A\hat{x}=A^Tb
+\]
+
+两边左乘：
+
+\[
+(A^TA)^{-1}
+\]
+
+得到：
+
+\[
+\boxed{\hat{x}=(A^TA)^{-1}A^Tb}
+\]
+
+这里的结果是一个**系数向量**。
+
+---
+
+## 2. 投影后的向量是 \(p\)
+
+真正落在列空间里的那个点：
+
+\[
+p=A\hat{x}
+\]
+
+把 \(\hat{x}\) 代入：
+
+\[
+p=A(A^TA)^{-1}A^Tb
+\]
+
+于是：
+
+\[
+\boxed{p=Pb}
+\]
+
+其中：
+
+\[
+\boxed{P=A(A^TA)^{-1}A^T}
+\]
+
+---
+
+所以关系：
+
+\[
+\boxed{
+\hat{x}=(A^TA)^{-1}A^Tb
+}
+\]
+
+先求坐标。
+
+然后：
+
+\[
+\boxed{
+p=A\hat{x}
+}
+\]
+
+把坐标转换回空间中的向量。
+
+---
+
+你感觉“少了一个 \(A\)”其实是因为你脑子里已经把两个公式连起来了：
+
+\[
+p=A\hat{x}
+\]
+
+所以你想的是：
+
+\[
+A(A^TA)^{-1}A^Tb
+\]
+
+这个确实是完整投影公式。
+
+但如果目标是求 \(\hat{x}\)，那个左边的 \(A\) 不应该出现。
+
+可以类比：
+
+- \(\hat{x}\)：告诉你“怎么组合 \(A\) 的列”
+- \(p\)：实际组合出来的向量
+
+类似：
+
+\[
+\text{坐标} \xrightarrow{A} \text{空间中的点}
+\]
+
+所以：
+
+\[
+\boxed{\hat{x}\text{ 是系数， }p\text{ 是投影结果}}
+\]
+
+你前面问 \(P\) 是不是列空间基，其实就在这里体现了：\(A\) 负责“生成列空间”，\(P\) 负责“把东西压到列空间”。
