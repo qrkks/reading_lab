@@ -54,7 +54,11 @@ A = Matrix([
     [1, 2],
     [1, 3],
 ])
-b = Matrix([1, 2, 2])
+b = Matrix([
+    1,
+    2,
+    2,
+])
 
 # display(A.gauss_jordan_solve(b)) # ValueError: Linear system has no solution
 

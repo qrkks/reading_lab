@@ -1,0 +1,1003 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```
+
+# Ax 是列向量的线性组合，为什么 x 又属于行空间呢？这里的列和行把人搞晕了
+
+对，**这里最容易把人绕晕的地方，就是“乘法时看列”和“\(x\) 所在的空间看行”同时成立。**它们说的是两件不同的事。
+
+先抓住一句最关键的：
+
+> **\(Ax\) 是 \(A\) 的列向量的线性组合；但 \(x\) 本身生活在 \(\mathbb R^n\)，而 \(A\) 的行空间也恰好生活在 \(\mathbb R^n\)。**
+
+假设
+
+\[
+A\in\mathbb R^{m\times n},\qquad
+x\in\mathbb R^n,\qquad
+b=Ax\in\mathbb R^m.
+\]
+
+那么 \(A\) 有 \(n\) 列：
+
+\[
+A=
+\begin{bmatrix}
+|&|&&|\\
+a_1&a_2&\cdots&a_n\\
+|&|&&|
+\end{bmatrix}
+\]
+
+而
+
+\[
+x=
+\begin{bmatrix}
+x_1\\x_2\\\vdots\\x_n
+\end{bmatrix}.
+\]
+
+所以
+
+\[
+Ax=x_1a_1+x_2a_2+\cdots+x_na_n.
+\]
+
+因此：
+
+\[
+\boxed{Ax\in C(A)}
+\]
+
+这里讨论的是 **输出 \(Ax\)**，所以自然看 **列空间（column space）**。
+
+---
+
+但现在单独看 \(x\)。
+
+因为 \(A\) 有 \(n\) 列，所以 \(x\) 有 \(n\) 个分量：
+
+\[
+x\in\mathbb R^n.
+\]
+
+再看看 \(A\) 的每一行：
+
+\[
+r_1=[a_{11},a_{12},\dots,a_{1n}]
+\]
+
+它也有 \(n\) 个分量，所以每一行也属于：
+
+\[
+\mathbb R^n.
+\]
+
+于是行空间：
+
+\[
+C(A^T)=\operatorname{Row}(A)
+\]
+
+也是 \(\mathbb R^n\) 里的一个子空间。
+
+这就是为什么 **\(x\) 可以和行空间发生关系**。
+
+## 但有个非常重要的修正
+
+不能笼统地说：
+
+\[
+x\in\operatorname{Row}(A).
+\]
+
+**一般的 \(x\) 不一定属于行空间。**
+
+准确地说是：
+
+\[
+\boxed{x=x_r+x_n}
+\]
+
+其中
+
+\[
+x_r\in \operatorname{Row}(A),
+\]
+
+而
+
+\[
+x_n\in N(A).
+\]
+
+也就是：
+
+\[
+\boxed{\mathbb R^n=
+\operatorname{Row}(A)\oplus N(A)}
+\]
+
+所以任何 \(x\) 都可以拆成：
+
+> **行空间部分 + 零空间部分**
+
+这个和你前面问的“四个基本子空间”正好接上了。
+
+---
+
+为什么这个拆分特别有意义？
+
+因为：
+
+\[
+Ax=A(x_r+x_n)
+\]
+
+于是：
+
+\[
+Ax=Ax_r+Ax_n.
+\]
+
+可是 \(x_n\in N(A)\)，所以：
+
+\[
+Ax_n=0.
+\]
+
+因此：
+
+\[
+\boxed{Ax=Ax_r}.
+\]
+
+这句话非常漂亮：
+
+> **\(A\) 实际上只“看得见” \(x\) 的行空间部分；\(x\) 的零空间部分被 \(A\) 消掉了。**
+
+所以：
+
+```{text}
+输入空间 Rⁿ
+│
+├── Row(A) 部分 ─────→ A 能看见 ─────→ C(A)
+│
+└── N(A) 部分   ─────→ A 消成 0
+```
+
+这可能就是你之前看到“\(x\) 属于行空间”时真正想表达的东西——更准确应该说 **\(x\) 的有效部分在行空间里**，而不是所有 \(x\) 都属于行空间。
+
+---
+
+你之所以觉得“明明 \(Ax\) 是组合列，怎么突然又冒出来行”，是因为教材在偷偷切换观察角度：
+
+\[
+\boxed{
+\text{从输出 }b=Ax\text{ 看} \Rightarrow \text{列空间}
+}
+\]
+
+\[
+\boxed{
+\text{从输入 }x\text{ 看} \Rightarrow \text{行空间 + 零空间}
+}
+\]
+
+于是四个基本子空间其实可以非常整齐地分成两边：
+
+\[
+\underbrace{\mathbb R^n}_{x\text{ 的世界}}
+=
+\operatorname{Row}(A)\oplus N(A)
+\]
+
+而
+
+\[
+\underbrace{\mathbb R^m}_{b\text{ 的世界}}
+=
+C(A)\oplus N(A^T).
+\]
+
+**\(x\) 在右边那个“输入世界” \(\mathbb R^n\)；\(b=Ax\) 在左边那个“输出世界” \(\mathbb R^m\)。**
+
+这个框架一旦立住，“行空间为什么和 \(x\) 有关、列空间为什么和 \(b\) 有关”就基本不会再乱了。
+
+# 举个例子哪能部分是行空间部分，哪部分是零空间部分
+
+可以，拿一个最简单的例子看最清楚。
+
+设
+
+\[
+A=
+\begin{bmatrix}
+1&1
+\end{bmatrix}
+\]
+
+那么 \(A\) 只有一行，所以它的**行空间（row space）**是
+
+\[
+\operatorname{Row}(A)
+=
+\operatorname{span}
+\left\{
+\begin{bmatrix}
+1\\
+1
+\end{bmatrix}
+\right\}.
+\]
+
+也就是说，行空间就是方向
+
+\[
+\begin{bmatrix}1\\1\end{bmatrix}
+\]
+
+上的所有向量。
+
+而零空间（null space）来自
+
+\[
+Ax=0.
+\]
+
+也就是：
+
+\[
+\begin{bmatrix}
+1&1
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\x_2
+\end{bmatrix}
+=0
+\]
+
+所以
+
+\[
+x_1+x_2=0,
+\]
+
+于是：
+
+\[
+N(A)
+=
+\operatorname{span}
+\left\{
+\begin{bmatrix}
+1\\
+-1
+\end{bmatrix}
+\right\}.
+\]
+
+现在随便取一个
+
+\[
+x=
+\begin{bmatrix}
+3\\
+1
+\end{bmatrix}.
+\]
+
+这个 \(x\) **既不在行空间，也不在零空间**。
+
+但它可以拆成：
+
+\[
+\begin{bmatrix}
+3\\
+1
+\end{bmatrix}
+=
+\begin{bmatrix}
+2\\
+2
+\end{bmatrix}
+
+- 
+\begin{bmatrix}
+1\\
+-1
+\end{bmatrix}.
+  \]
+
+注意这两部分：
+
+\[
+\boxed{
+x_r=
+\begin{bmatrix}
+2\\
+2
+\end{bmatrix}
+}
+\]
+
+因为
+
+\[
+\begin{bmatrix}
+2\\2
+\end{bmatrix}
+=
+2
+\begin{bmatrix}
+1\\1
+\end{bmatrix},
+\]
+
+所以：
+
+\[
+x_r\in\operatorname{Row}(A).
+\]
+
+而：
+
+\[
+\boxed{
+x_n=
+\begin{bmatrix}
+1\\
+-1
+\end{bmatrix}
+}
+\]
+
+满足：
+
+\[
+A x_n
+=
+\begin{bmatrix}
+1&1
+\end{bmatrix}
+\begin{bmatrix}
+1\\-1
+\end{bmatrix}
+=1-1=0.
+\]
+
+所以：
+
+\[
+x_n\in N(A).
+\]
+
+于是：
+
+\[
+\boxed{
+x=x_r+x_n
+}
+\]
+
+具体就是：
+
+\[
+\boxed{
+\begin{bmatrix}
+3\\1
+\end{bmatrix}
+=
+\underbrace{
+\begin{bmatrix}
+2\\2
+\end{bmatrix}
+}_{\text{行空间部分}}
++
+\underbrace{
+\begin{bmatrix}
+1\\-1
+\end{bmatrix}
+}_{\text{零空间部分}}
+}
+\]
+
+最有意思的是再乘 \(A\)：
+
+\[
+Ax
+=
+\begin{bmatrix}
+1&1
+\end{bmatrix}
+\begin{bmatrix}
+3\\1
+\end{bmatrix}
+=4.
+\]
+
+而只乘行空间部分：
+
+\[
+Ax_r
+=
+\begin{bmatrix}
+1&1
+\end{bmatrix}
+\begin{bmatrix}
+2\\2
+\end{bmatrix}
+=4.
+\]
+
+零空间部分：
+
+\[
+Ax_n=0.
+\]
+
+所以：
+
+\[
+\boxed{Ax=Ax_r}
+\]
+
+这就是前面说的：
+
+> \(A\) 只能“看见” \(x\) 的行空间部分，零空间部分会被 \(A\) 消掉。
+
+你甚至可以把它想成二维平面里两条互相垂直的线：
+
+\[
+\operatorname{Row}(A)
+=
+\operatorname{span}(1,1)
+\]
+
+是一条 \(45^\circ\) 的线，
+
+\[
+N(A)
+=
+\operatorname{span}(1,-1)
+\]
+
+是一条 \(-45^\circ\) 的线。
+
+而 \(x=(3,1)\) 就被拆成这两个正交方向上的两个分量。
+
+本质上跟你以前学的：
+
+\[
+\text{一个向量}
+=
+\text{x 方向分量}
++
+\text{y 方向分量}
+\]
+
+完全是同一件事，只不过现在坐标轴换成了：
+
+\[
+\boxed{\text{行空间方向}+\text{零空间方向}}
+\]
+
+而且这两个空间天然正交。
+
+# 这个能用 sympy 算 xr 和 xn 吗？
+
+可以，而且 **SymPy 用伪逆（pseudoinverse）算最方便**。
+
+刚才这个例子：
+
+\[
+A=
+\begin{bmatrix}
+1&1
+\end{bmatrix},
+\qquad
+x=
+\begin{bmatrix}
+3\\1
+\end{bmatrix}
+\]
+
+我们要拆成：
+
+\[
+x=x_r+x_n
+\]
+
+其中
+
+\[
+x_r\in \operatorname{Row}(A),\qquad
+x_n\in N(A).
+\]
+
+可以直接写：
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([[1, 1]])
+x = Matrix([3, 1])
+
+xr = A.pinv() * A * x
+xn = x - xr
+
+display(xr)
+display(xn)
+```
+
+得到：
+
+```{text}
+Matrix([
+[2],
+[2]])
+
+Matrix([
+[ 1],
+[-1]])
+```
+
+也就是：
+
+\[
+\boxed{
+x_r=
+\begin{bmatrix}
+2\\2
+\end{bmatrix}
+}
+\]
+
+和
+
+\[
+\boxed{
+x_n=
+\begin{bmatrix}
+1\\-1
+\end{bmatrix}
+}
+\]
+
+正好就是我们刚才手算的结果。
+
+这里尤其值得你理解这一句：
+
+```{python}
+A.pinv() * A
+```
+
+它本身就是一个投影矩阵：
+
+\[
+\boxed{P_{\text{row}}=A^+A}
+\]
+
+其中 \(A^+\) 是 Moore–Penrose 伪逆（pseudoinverse）。
+
+它把任意：
+
+\[
+x\in\mathbb R^n
+\]
+
+投影到：
+
+\[
+\operatorname{Row}(A)
+\]
+
+因此：
+
+\[
+x_r=P_{\text{row}}x=A^+Ax.
+\]
+
+剩下来的：
+
+\[
+x_n=x-x_r
+\]
+
+自然就在零空间中。
+
+你还可以检查：
+
+```{python}
+print(A * xn)
+```
+
+得到：
+
+```{text}
+Matrix([[0]])
+```
+
+所以确实：
+
+\[
+x_n\in N(A).
+\]
+
+再检查行空间部分和零空间部分是否正交：
+
+```{python}
+print(xr.dot(xn))
+```
+
+得到：
+
+```{text}
+0
+```
+
+即：
+
+\[
+x_r^T x_n=0.
+\]
+
+所以整个过程其实就是：
+
+\[
+\boxed{
+x
+\xrightarrow{\text{投影到 Row}(A)}
+x_r
+}
+\]
+
+然后：
+
+\[
+\boxed{x_n=x-x_r}.
+\]
+
+这和你刚学的**正交投影（orthogonal projection）完全是同一个东西**。
+
+如果 \(A\) 的行线性无关，还可以不用伪逆，直接写你熟悉的投影公式：
+
+\[
+\boxed{
+P_{\text{row}}
+=
+A^T(AA^T)^{-1}A
+}
+\]
+
+所以 SymPy 也可以：
+
+```{python}
+P = A.T * (A * A.T).inv() * A
+
+xr = P * x
+xn = x - xr
+```
+
+对于这个例子同样得到：
+
+\[
+x_r=(2,2)^T,\qquad x_n=(1,-1)^T.
+\]
+
+不过我更推荐你记：
+
+```{python}
+xr = A.pinv() * A * x
+xn = x - xr
+```
+
+因为即使 \(A\) 的行不独立，它也照样能算。
+
+# 什么叫伪逆？
+
+伪逆（pseudoinverse）可以先把它理解成：
+
+> **当矩阵没有真正的逆矩阵时，构造一个“尽可能像逆”的矩阵。**
+
+通常记作：
+
+\[
+A^+
+\]
+
+也叫 **Moore–Penrose pseudoinverse（穆尔–彭若斯伪逆）**。
+
+比如普通逆矩阵要求 \(A\) 是方阵而且满秩：
+
+\[
+A^{-1}A=I.
+\]
+
+但很多矩阵根本不是方阵，例如我们刚才的：
+
+\[
+A=
+\begin{bmatrix}
+1&1
+\end{bmatrix}
+\]
+
+这是 \(1\times2\) 矩阵，根本不存在 \(A^{-1}\)。
+
+可是我们仍然很想做类似“反解”：
+
+\[
+Ax=b
+\]
+
+从 \(b\) 尽可能找回一个 \(x\)。
+
+这时候就用：
+
+\[
+\boxed{x=A^+b}
+\]
+
+---
+
+拿刚才这个例子：
+
+\[
+A=
+\begin{bmatrix}
+1&1
+\end{bmatrix}.
+\]
+
+它的伪逆是：
+
+\[
+A^+
+=
+\begin{bmatrix}
+1/2\\
+1/2
+\end{bmatrix}.
+\]
+
+为什么？
+
+因为如果：
+
+\[
+Ax=b,
+\]
+
+就是：
+
+\[
+x_1+x_2=b.
+\]
+
+这个方程有无数个解：
+
+\[
+(0,b),(1,b-1),(2,b-2),\dots
+\]
+
+伪逆会从所有解里选一个很特殊的：
+
+\[
+\boxed{
+x=
+\begin{bmatrix}
+b/2\\
+b/2
+\end{bmatrix}
+}
+\]
+
+也就是：
+
+\[
+A^+b.
+\]
+
+例如 \(b=4\)：
+
+\[
+A^+4
+=
+\begin{bmatrix}
+2\\
+2
+\end{bmatrix}.
+\]
+
+这正是我们前面得到的那个：
+
+\[
+x_r=
+\begin{bmatrix}
+2\\2
+\end{bmatrix}.
+\]
+
+而原来的：
+
+\[
+x=
+\begin{bmatrix}
+3\\1
+\end{bmatrix}
+\]
+
+虽然也满足：
+
+\[
+Ax=4,
+\]
+
+但是它多了一块零空间成分：
+
+\[
+\begin{bmatrix}
+3\\1
+\end{bmatrix}
+=
+\begin{bmatrix}
+2\\2
+\end{bmatrix}
+
+- 
+\begin{bmatrix}
+1\\-1
+\end{bmatrix}.
+  \]
+
+伪逆给你的就是：
+
+\[
+\boxed{\text{不含零空间成分的那个最短解}}
+\]
+
+这点特别重要。
+
+所以对于有无穷多个解的 \(Ax=b\)，伪逆选：
+
+\[
+\boxed{\text{最小范数解（minimum-norm solution）}}
+\]
+
+也就是长度：
+
+\[
+\|x\|
+\]
+
+最小的那个。
+
+---
+
+而如果 \(Ax=b\) 根本无解呢？
+
+例如一个高矩阵：
+
+\[
+A\in\mathbb R^{m\times n},\qquad m>n
+\]
+
+通常 \(b\) 不一定在列空间 \(C(A)\) 里。
+
+这时伪逆给：
+
+\[
+\boxed{x=A^+b}
+\]
+
+就是最小二乘解（least-squares solution）：
+
+\[
+\boxed{
+\min_x\|Ax-b\|
+}
+\]
+
+也就是找一个 \(x\)，让 \(Ax\) 尽可能接近 \(b\)。
+
+所以伪逆特别强，它把你学过的两件事统一起来了：
+
+\[
+\boxed{
+A^+b
+}
+\]
+
+可以表示：
+
+- 有唯一解 → 就给唯一解；
+- 有无穷多解 → 给最小范数解；
+- 没有精确解 → 给最小二乘解。
+
+如果 \(A\) 本来就是可逆方阵，那么更简单：
+
+\[
+\boxed{A^+=A^{-1}}
+\]
+
+所以普通逆矩阵其实可以看成伪逆的特殊情况。
+
+你现在可以先把它记成：
+
+\[
+\boxed{
+\text{inverse：真正倒回去}
+}
+\]
+
+\[
+\boxed{
+\text{pseudoinverse：不能真正倒回去时，选数学上最合理的“倒回去”}
+}
+\]
+
+而我们刚才为什么：
+
+\[
+x_r=A^+Ax
+\]
+
+会得到 \(x\) 的行空间部分？
+
+因为：
+
+\[
+Ax
+\]
+
+已经把 \(x\) 的零空间部分消掉了，而 \(A^+\) 再从 \(Ax\) 反解回来时，会选择**没有零空间成分的最小范数解**，于是恰好就是 \(x_r\)。
+
+这一点其实非常漂亮：
+
+\[
+\boxed{
+x
+\xrightarrow{A}
+Ax
+\xrightarrow{A^+}
+x_r
+}
+\]
+
+所以：
+
+\[
+\boxed{A^+A}
+\]
+
+就是投影到行空间的投影矩阵。

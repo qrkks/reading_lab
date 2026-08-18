@@ -1,0 +1,20 @@
+project:
+  type: book
+
+book:
+  title: "线性代数（原书第 6 版·中文版）"
+  author: "Strang"
+  date: "2026/8/18"
+  chapters:
+    - index.qmd
+    - chapters/0.qmd
+  appendices:
+    - appendices/0.qmd
+
+format:
+  docx: default
+  html:
+    include-in-header:
+      file: ../../assets/main-header.html
+
+from: markdown+tex_math_single_backslash
