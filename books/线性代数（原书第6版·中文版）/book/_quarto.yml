@@ -8,8 +8,12 @@ book:
   chapters:
     - index.qmd
     - chapters/0.qmd
+    - chapters/1.qmd
+    - chapters/2.qmd
   appendices:
     - appendices/0.qmd
+    - appendices/1.qmd
+    - appendices/2.qmd
 
 format:
   docx: default

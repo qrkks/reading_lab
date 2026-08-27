@@ -1,0 +1,544 @@
+# 2
+
+## sympy 里如何给一个矩阵加一列向量，就是加一个解向量组成增广矩阵？
+
+在 SymPy 里，把一个列向量加到矩阵右边组成**增广矩阵（augmented matrix）**，常用的是 `row_join()`。
+
+例如：
+
+```python
+import sympy as sp
+
+A = sp.Matrix([[1, 2], [3, 4], [5, 6]])
+
+b = sp.Matrix([7, 8, 9])
+
+Aug = A.row_join(b)
+
+print(Aug)
+```
+
+输出：
+
+```
+Matrix([
+[1, 2, 7],
+[3, 4, 8],
+[5, 6, 9]])
+```
+
+也就是：
+
+\[
+A=
+\begin{bmatrix}
+1&2\\
+3&4\\
+5&6
+\end{bmatrix}
+\]
+
+加上：
+
+\[
+b=
+\begin{bmatrix}
+7\\
+8\\
+9
+\end{bmatrix}
+\]
+
+得到：
+
+\[
+[A|b]=
+\begin{bmatrix}
+1&2&|&7\\
+3&4&|&8\\
+5&6&|&9
+\end{bmatrix}
+\]
+
+---
+
+如果你的向量是行向量：
+
+```python
+b = sp.Matrix([[7, 8, 9]])
+```
+
+那么它是 \(1\times3\)，不能直接拼。需要转置：
+
+```python
+Aug = A.row_join(b.T)
+```
+
+---
+
+反过来，如果想**增加一行**：
+
+```python
+A.col_join(sp.Matrix([[7, 8]]))
+```
+
+例如：
+
+\[
+\begin{bmatrix}
+1&2\\
+3&4
+\end{bmatrix}
+\]
+
+加一行：
+
+\[
+[5,6]
+\]
+
+得到：
+
+\[
+\begin{bmatrix}
+1&2\\
+3&4\\
+5&6
+\end{bmatrix}
+\]
+
+---
+
+和你最近学的 \(Ax=b\) 联系起来：
+
+增广矩阵：
+
+```python
+Aug = A.row_join(b)
+```
+
+然后：
+
+```python
+Aug.rref()
+```
+
+就相当于手算消元：
+
+\[
+[A|b]\rightarrow [R|c]
+\]
+
+其中最后一列会告诉你：
+
+- 有没有解
+- 主元位置
+- 自由变量
+
+这正好对应 Strang 里讲的消元矩阵 \(E[A|b]\)。
+
+## 怎么判断这个增广矩阵是有唯一解，无解和无穷多解？
+
+在 SymPy 里判断增广矩阵 \([A|b]\) 的解的情况，本质上就是看 **RREF（reduced row echelon form，简化行阶梯形）里的主元情况**。
+
+设：
+
+\[
+Ax=b
+\]
+
+增广矩阵：
+
+\[
+[A|b]
+\]
+
+对它做：
+
+```python
+rref_matrix, pivots = Aug.rref()
+```
+
+例如：
+
+```python
+import sympy as sp
+
+A = sp.Matrix([[1, 2], [3, 4]])
+
+b = sp.Matrix([5, 6])
+
+Aug = A.row_join(b)
+
+R, pivots = Aug.rref()
+
+print(R)
+print(pivots)
+```
+
+---
+
+### 1. 无解（no solution）
+
+关键：
+
+> 增广矩阵最后一列出现主元。
+
+也就是出现：
+
+\[
+[0\quad0\quad|\quad c]
+\]
+
+其中：
+
+\[
+c\neq0
+\]
+
+例如：
+
+\[
+\begin{bmatrix}
+1&2&|&3\\
+0&0&|&5
+\end{bmatrix}
+\]
+
+第二行表示：
+
+\[
+0x_1+0x_2=5
+\]
+
+显然不可能。
+
+SymPy：
+
+```python
+R, pivots = Aug.rref()
+
+if Aug.shape[1] - 1 in pivots:
+    print("无解")
+```
+
+因为最后一列的索引是：
+
+```python
+Aug.shape[1] - 1
+```
+
+---
+
+### 2. 唯一解（unique solution）
+
+条件：
+
+1. 没有矛盾行
+2. 每个变量都有主元
+
+也就是：
+
+\[
+rank(A)=rank([A|b])=n
+\]
+
+其中：
+
+- \(n\)：未知数个数（A 的列数）
+
+例如：
+
+\[
+\begin{bmatrix}
+1&0&|&3\\
+0&1&|&2
+\end{bmatrix}
+\]
+
+两个变量两个主元：
+
+\[
+x_1=3,x_2=2
+\]
+
+SymPy：
+
+```python
+n = A.cols
+
+if len(pivots) == n:
+    print("唯一解")
+```
+
+---
+
+### 3. 无穷多解（infinitely many solutions）
+
+条件：
+
+1. 没有矛盾行
+2. 主元数量小于变量数量
+
+例如：
+
+\[
+\begin{bmatrix}
+1&2&|&3\\
+0&0&|&0
+\end{bmatrix}
+\]
+
+只有一个主元：
+
+\[
+x_1+2x_2=3
+\]
+
+两个变量，一个约束：
+
+所以有自由变量：
+
+\[
+x_2=t
+\]
+
+无穷多个解。
+
+SymPy：
+
+```python
+n = A.cols
+
+if len(pivots) < n:
+    print("无穷多解")
+```
+
+---
+
+### 一个完整判断函数：
+
+```python
+def classify_system(A, b):
+    Aug = A.row_join(b)
+
+    R, pivots = Aug.rref()
+
+    n = A.cols
+
+    # 最后一列是否为主元
+    if n in pivots:
+        return "无解"
+
+    # 主元数量
+    rank = len(pivots)
+
+    if rank == n:
+        return "唯一解"
+    else:
+        return "无穷多解"
+
+
+A = sp.Matrix([[1, 2], [3, 4]])
+
+b = sp.Matrix([5, 6])
+
+print(classify_system(A, b))
+```
+
+---
+
+和你前面学的四个基本子空间联系起来：
+
+#### 唯一解
+
+\[
+N(A)=0
+\]
+
+没有自由方向。
+
+---
+
+#### 无穷多解
+
+\[
+N(A)\neq0
+\]
+
+存在自由变量：
+
+\[
+x=x_p+x_n
+\]
+
+其中：
+
+- \(x_p\)：特解（particular solution）
+- \(x_n\)：零空间（null space）里的任意向量
+
+---
+
+#### 无解
+
+\[
+b\notin C(A)
+\]
+
+也就是：
+
+右侧 \(b\) 不在列空间（column space）里。
+
+所以从 Strang 的角度看：
+
+- **唯一解**：列空间覆盖了 b，并且没有零空间
+- **无穷多解**：覆盖了 b，但有零空间
+- **无解**：b 不在列空间里
+
+这三个判断其实就是「列空间 + 零空间」的计算版本。
+
+## 这个 rref 的第二行怎么看？
+
+你这个 RREF（reduced row echelon form，简化行阶梯形）是：
+
+\[
+\begin{bmatrix}
+1&0&1\\
+0&1&1
+\end{bmatrix}
+\]
+
+如果它是增广矩阵：
+
+\[
+[A|b]
+=
+\begin{bmatrix}
+1&0&|&1\\
+0&1&|&1
+\end{bmatrix}
+\]
+
+那么第二行：
+
+\[
+[0\quad1\quad1]
+\]
+
+应该这样读：
+
+\[
+0x_1+1x_2=1
+\]
+
+也就是：
+
+\[
+x_2=1
+\]
+
+---
+
+第一行：
+
+\[
+[1\quad0\quad1]
+\]
+
+表示：
+
+\[
+x_1+0x_2=1
+\]
+
+所以：
+
+\[
+x_1=1
+\]
+
+因此解：
+
+\[
+\begin{cases}
+x_1=1\\
+x_2=1
+\end{cases}
+\]
+
+---
+
+这里容易误解的是：**第二行不是一个向量，而是一条方程。**
+
+RREF 的每一行对应一个方程。
+
+例如：
+
+\[
+\begin{bmatrix}
+1&0&3\\
+0&1&5
+\end{bmatrix}
+\]
+
+读成：
+
+第一行：
+
+\[
+x_1=3
+\]
+
+第二行：
+
+\[
+x_2=5
+\]
+
+---
+
+结合你刚才问的「唯一解/无穷解」：
+
+这个矩阵：
+
+\[
+\begin{bmatrix}
+1&0&1\\
+0&1&1
+\end{bmatrix}
+\]
+
+有两个变量 \(x_1,x_2\)，两个主元：
+
+\[
+\boxed{\text{唯一解}}
+\]
+
+如果变成：
+
+\[
+\begin{bmatrix}
+1&0&1\\
+0&0&0
+\end{bmatrix}
+\]
+
+那么：
+
+\[
+x_1=1
+\]
+
+但 \(x_2\) 没有约束：
+
+\[
+x_2=t
+\]
+
+所以：
+
+\[
+\boxed{\text{无穷多解}}
+\]
+
+你现在看到的这个例子其实就是最简单的「主元列 = 变量被确定」的情况。第二列的那个 1 就是在告诉你：**第二个变量被这一行锁定了。**

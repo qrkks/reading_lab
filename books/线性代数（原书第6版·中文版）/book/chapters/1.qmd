@@ -1,0 +1,169 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```
+
+# 向量和矩阵
+
+## 向量及其线性组合
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+import matplotlib.pyplot as plt
+
+# 起点和终点
+start = (-1, 2)
+end = (4, 2)
+
+fig, ax = plt.subplots()
+
+# 画箭头：从 start 指向 end
+ax.quiver(
+    start[0],
+    start[1],
+    end[0] - start[0],
+    end[1] - start[1],
+    angles="xy",
+    scale_units="xy",
+    scale=1,
+)
+
+# 标记两个点
+ax.scatter(*start)
+ax.scatter(*end)
+
+# 标注
+ax.text(start[0], start[1], " (-1,2)")
+ax.text(end[0], end[1], " (4,2)")
+
+# 设置坐标范围
+ax.set_xlim(-3, 6)
+ax.set_ylim(0, 4)
+
+# 显示网格和坐标轴
+ax.grid(True)
+ax.axhline(0)
+ax.axvline(0)
+
+plt.gca().set_aspect("equal")
+plt.show()
+```
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+import matplotlib.pyplot as plt
+
+# 向量
+v = (4, 2)
+w = (-1, 2)
+
+fig, ax = plt.subplots()
+
+# 画向量：都从原点出发
+ax.quiver(0, 0, v[0], v[1], angles="xy", scale_units="xy", scale=1)
+ax.quiver(0, 0, w[0], w[1], angles="xy", scale_units="xy", scale=1)
+
+# 标出终点
+ax.scatter([v[0], w[0]], [v[1], w[1]])
+
+# 标注
+ax.text(v[0], v[1], "  v=(4,2)")
+ax.text(w[0], w[1], "  w=(-1,2)")
+ax.text(0, 0, " O")
+
+# 坐标轴
+ax.axhline(0)
+ax.axvline(0)
+ax.grid(True)
+
+# 显示范围
+ax.set_xlim(-3, 6)
+ax.set_ylim(-1, 4)
+
+# 保证 x、y 刻度比例一致
+ax.set_aspect("equal")
+
+plt.show()
+```
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(8, 3))
+
+# 跷跷板
+ax.plot([-3, 4], [0, 0], linewidth=4)
+
+# 支点（三角形）
+ax.scatter(0, -0.3, marker="^", s=300)
+
+# 左边重量
+ax.scatter(-1, 0.15, s=500)
+ax.text(-1, 0.35, "weight = 4", ha="center")
+
+# 右边重量
+ax.scatter(2, 0.15, s=300)
+ax.text(2, 0.35, "weight = 2", ha="center")
+
+# 标出距离
+ax.text(-1, -0.25, "x=-1", ha="center")
+ax.text(2, -0.25, "x=2", ha="center")
+ax.text(0, -0.5, "pivot", ha="center")
+
+# 力方向箭头
+ax.arrow(-1, 1, 0, -0.7, head_width=0.15, length_includes_head=True)
+
+ax.arrow(2, 0.8, 0, -0.5, head_width=0.15, length_includes_head=True)
+
+# 坐标范围
+ax.set_xlim(-3, 4)
+ax.set_ylim(-1, 2)
+
+ax.axhline(0)
+ax.axvline(0)
+
+ax.set_aspect("equal")
+ax.axis("off")
+
+plt.show()
+```
+
+![](image.png)
+
+![](image_1.png)

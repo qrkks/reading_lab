@@ -1,0 +1,196 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```
+
+# 解线性方程组 $Ax=b$
+
+## 消元法和回代
+
+[sympy 里如何给一个矩阵加一列向量，就是加一个解向量组成增广矩阵？](../appendices/2.qmd#sympy-里如何给一个矩阵加一列向量就是加一个解向量组成增广矩阵)
+
+(1) $Ax=b$ 只有唯一解
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [2, 3],
+    [4, 2],
+])
+
+display(A.inv())
+
+b = Matrix([5, 6])
+
+aug = A.row_join(b)
+
+display(aug)
+
+display(*aug.rref())
+```
+
+[这个 rref 的第二行怎么看？](../appendices/2.qmd#这个-rref-的第二行怎么看)
+
+(2) $Ax=b$ 无解
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [2, 3],
+    [4, 6],
+])
+
+b = Matrix([6, 15])
+
+aug = A.row_join(b)
+
+display(aug)
+
+display(*aug.rref())
+```
+
+(3) $Ax=b$ 有无穷多解
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [2, 3],
+    [4, 6],
+])
+
+b = Matrix([6, 12])
+
+aug = A.row_join(b)
+
+display(aug)
+
+display(*aug.rref())
+```
+
+### 回代解法 $Ux=c$
+
+### 把 A 转化成 U，b 转化成 c
+
+```{python}
+#| output: asis
+
+from books.assets.reading_lab_display import display
+
+import sympy as sp
+
+E21 = sp.Matrix([
+    [1, 0, 0],
+    [-2, 1, 0],
+    [0, 0, 1],
+])
+E31 = sp.Matrix([
+    [1, 0, 0],
+    [0, 1, 0],
+    [-1, 0, 1],
+])
+E32 = sp.Matrix([
+    [1, 0, 0],
+    [0, 1, 0],
+    [0, -1, 1],
+])
+
+res = E32 * E31 * E21
+display(res)
+
+A = sp.Matrix([
+    [2, 3, 4],
+    [4, 11, 14],
+    [2, 8, 17],
+])
+b = sp.Matrix([19, 55, 50])
+aug = A.row_join(b)
+display("aug", aug)
+
+display("E21*aug", E21 * aug)
+display("E31*E21*aug", E31 * E21 * aug)
+
+display("res*aug", res * aug)
+display("A.inv()", A.inv())
+
+L, U, perm = A.LUdecomposition()
+display("L", L, "U", U)
+
+display("L.inv() == res", L.inv() == res)
+```
+
+## 初等矩阵和逆矩阵
+
+### 和逆矩阵有关的事实
+
+注释 7
+
+```{python}
+#| output: asis
+
+from sympy import Matrix, symbols
+from books.assets.reading_lab_display import display
+
+d1, d2, d3 = symbols("d1 d2 d3")
+A = Matrix([
+    [d1, 0, 0],
+    [0, d2, 0],
+    [0, 0, d3],
+])
+display(A.inv())
+```
+
+例 2.2
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [1, 2],
+    [1, 2],
+])
+
+display(A.det())
+```
+
+### 初等矩阵和逆矩阵
+
+### 矩阵运算和 LU 分解
