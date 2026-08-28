@@ -1,0 +1,282 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```
+
+# 矩阵的四个基本子空间
+
+## 线性空间及其子空间
+
+## 通过消元法 $A = CR$ 计算零空间
+
+例 3.8
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [1, 7, 3, 35],
+    [2, 14, 6, 70],
+    [2, 14, 9, 97],
+])
+
+display(A.rref())
+```
+
+[sympy 的 rref 会交换 0 行的位置吗？](../appendices/3.qmd#sympy-的-rref-会交换-0-行的位置吗)
+
+例 3.9
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+
+A = Matrix([
+    [1, 2, 1],
+    [2, 4, 5],
+    [3, 6, 9],
+])
+
+display(A.rref())
+```
+
+例 3.10
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [1, 2],
+    [3, 8],
+])
+B = A.vstack(A, 2 * A)
+M = A.hstack(A, 2 * A)
+
+display("A", A)
+display(*A.nullspace())
+display("B", B)
+display(*B.nullspace())
+display("M", M)
+display(*M.nullspace())
+display(*M.rref())
+```
+
+## 方程组 $Ax = b$ 的解集
+
+```{python}
+#| output: asis
+
+from sympy import Matrix, symbols
+from books.assets.reading_lab_display import display
+
+# 增广矩阵 [A | b]
+augmented = Matrix([
+    [1, 3, 0, 2, 1],
+    [0, 0, 1, 4, 6],
+    [1, 3, 1, 6, 7],
+])
+
+A = augmented[:, :-1]  # 系数矩阵 A，取全部行，除最后一列
+# display(A)
+
+b1, b2, b3 = symbols("b1 b2 b3")
+b = Matrix([b1, b2, b3])
+aug = Matrix.hstack(A, b)
+display(aug)
+
+display(*augmented.rref())
+display(*aug.rref())
+display(aug.echelon_form())
+```
+
+[最后一列不应该是 b1,b2,b3-b1-b2 吗？](../appendices/3.qmd#最后一列不应该是-b1b2b3-b1-b2-吗)
+
+例 3.11
+
+```{python}
+#| output: asis
+
+from sympy import Matrix, symbols
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [1, 1],
+    [1, 2],
+    [-2, -3],
+])
+
+b1, b2, b3 = symbols("b1 b2 b3")
+b = Matrix([b1, b2, b3])
+
+aug = A.row_join(b)
+display(aug)
+display(aug.echelon_form())
+display(*aug.rref())
+# display(A.gauss_jordan_solve(b))
+```
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+from sympy import Matrix, symbols
+
+A = Matrix([
+    [1, 1],
+    [1, 2],
+    [-2, -3],
+])
+
+b1, b2 = symbols("b1 b2")
+
+b = Matrix([
+    b1,
+    b2,
+    -b1 - b2,
+])
+
+display(*A.gauss_jordan_solve(b))
+display(*A.rref())
+```
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+b_ok = Matrix([b1, b2, -b1 - b2])
+
+aug_ok = A.row_join(b_ok)
+
+display(*aug_ok.rref())
+```
+
+## 线性无关性、基、维数
+
+例 3.18
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+C = Matrix([
+    [1, 0],
+    [0, 1],
+    [0, 0],
+])
+R = Matrix([
+    [1, 2, 0, 3],
+    [0, 0, 1, 4],
+])
+display(C * R)
+```
+定义 3.7
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([[1, 5, 2]])
+
+display(*A.nullspace())
+display(*A.rref())
+```
+
+例 3.19
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+import sympy as sp
+
+A = sp.Matrix([[1, 2, 3], [2, 4, 6]])
+
+display(*A.T.nullspace())
+```
+
+例 3.20
+
+```{python}
+#| output: asis
+
+from sympy import Matrix, symbols
+from books.assets.reading_lab_display import display
+
+
+A = Matrix([
+    [-1, 1, 0, 0],
+    [-1, 0, 1, 0],
+    [0, -1, 1, 0],
+    [0, -1, 0, 1],
+    [0, 0, -1, 1],
+])
+
+b1, b2, b3, b4, b5 = symbols("b1 b2 b3 b4 b5")
+b = Matrix([b1, b2, b3, b4, b5])
+aug = A.row_join(b)
+
+display(*A.nullspace())
+display(*A.rref())
+display(aug.echelon_form())
+display(*A.T.rref())
+display(*A.T.nullspace())
+```
+
+例 4.1
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [1, -2, 1],
+    [1, 0, -1],
+])
+display(*A.nullspace())
+display(*A.rref())
+```
