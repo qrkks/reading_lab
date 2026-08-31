@@ -11,11 +11,13 @@ book:
     - chapters/1.qmd
     - chapters/2.qmd
     - chapters/3.qmd
+    - chapters/4.qmd
   appendices:
     - appendices/0.qmd
     - appendices/1.qmd
     - appendices/2.qmd
     - appendices/3.qmd
+    - appendices/4.md
 
 format:
   docx: default

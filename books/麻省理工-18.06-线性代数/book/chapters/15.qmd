@@ -1,7 +1,5 @@
-# 投影
-
 ---
-engine: julia
+eengine: julia
 julia:
   env:
     - "JULIA_PYTHONCALL_EXE=@venv"
@@ -28,6 +26,8 @@ if str(repo_root) not in sys.path:
 
 from books.assets.reading_lab_display import display
 ```
+
+# 投影
 
 $$a^T \left(b - xa\right) = 0$$
 
