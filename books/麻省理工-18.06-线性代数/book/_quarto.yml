@@ -22,7 +22,7 @@ book:
     - chapters/13.qmd
     - chapters/14.qmd
     - chapters/15.qmd
-    - chapters/16.qmd
+    - chapters/16.md
     - chapters/c1.md
     - chapters/c2.md
   appendices:

@@ -1,5 +1,5 @@
 ---
-eengine: julia
+engine: julia
 julia:
   env:
     - "JULIA_PYTHONCALL_EXE=@venv"

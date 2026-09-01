@@ -1,1 +1,66 @@
-# 16
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```
+
+# 投影矩阵和最小二乘
+
+```{python}
+#| output: asis
+
+from sympy import Matrix
+from books.assets.reading_lab_display import display
+
+A = Matrix([
+    [1, 1],
+    [1, 2],
+    [1, 3],
+])
+b = Matrix([1, 2, 2])
+
+# display(A.gauss_jordan_solve(b)) # 无精确解，报错 ValueError: Linear system has no solution
+display((A.T * A).gauss_jordan_solve(A.T * b))  # 看懂原理
+display(A.pinv() * b)
+display(A.pinv_solve(b))
+display(x_hat, _ := A.solve_least_squares(b))  # 使用软件
+
+display(A.T * A)
+display(A.T * b)
+
+display("x_hat", x_hat)
+display("p", p := A * x_hat)
+display("e", e := b - p)
+
+display(e.dot(p))
+display(A.T * e)
+```
+
+[sympy 能算$e_i$吗？](../appendices/16.md#sympy-能算e_i吗)
+
+Columns definitely independent if they are perp. unit vectors.
+
+-- orthonomal vectors
