@@ -1,0 +1,74 @@
+---
+engine: julia
+julia:
+  env:
+    - "JULIA_PYTHONCALL_EXE=@venv"
+    - "JULIA_CONDAPKG_BACKEND=Null"
+    - "PYTHONPATH=../../../.."
+    - "NO_COLOR=1"
+---
+
+```{julia}
+import PythonCall
+```
+
+```{python}
+import sys
+from pathlib import Path
+
+repo_root = next(
+    path
+    for path in (Path.cwd(), *Path.cwd().parents)
+    if (path / "books" / "assets" / "reading_lab_display.py").is_file()
+)
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
+from books.assets.reading_lab_display import display
+```
+
+# 正交矩阵和正交化法
+
+$Q$ has orthonormal columns
+
+Project onto its column space
+
+$$
+P = Q\left(Q^\top Q\right)^{-1}Q^\top = QQ^\top
+\begin{cases}
+= I & \text{if } Q \text{ is square}
+\end{cases}
+$$
+
+[意思是说 Q 是方阵，投影矩阵 P 就是 I 了？](../appendices/17.md#意思是说-q-是方阵投影矩阵-p-就是-i-了)
+
+[噢，明白了，删掉某些方向不是减维，是把那个维度的分量变成 0 是吗？如果投影矩阵是 $m*n$，那就是说把 $R^m$ 里的矩阵或向量里的 m-n 维变成 0，然后再投到 $R^m$ 里？](../appendices/17.md#噢明白了删掉某些方向不是减维是把那个维度的分量变成-0-是吗如果投影矩阵是-mn那就是说把-rm-里的矩阵或向量里的-m-n-维变成-0然后再投到-rm-里)
+
+[P 的形状不是 $m*n$，Q 的形状才是 $m*n$？](../appendices/17.md#p-的形状不是-mnq-的形状才是-mn)
+
+$$
+A^\top A \hat{\boldsymbol x} = A^\top \boldsymbol b
+$$
+
+Now $A$ is $Q$
+
+$$
+Q^\top Q \hat{\boldsymbol x} = Q^\top \boldsymbol b
+$$
+
+$$
+\hat{\boldsymbol x} = Q^\top \boldsymbol b
+$$
+
+```{python}
+#| output: asis
+
+from sympy import Matrix, GramSchmidt
+from books.assets.reading_lab_display import display
+
+a = Matrix([1, 1, 1])
+b = Matrix([1, 0, 2])
+
+display("orthogonal", *GramSchmidt([a, b], False))
+display("orthonormal", *GramSchmidt([a, b], True))
+```

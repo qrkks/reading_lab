@@ -46,7 +46,7 @@ b = Matrix([1, 2, 2])
 display((A.T * A).gauss_jordan_solve(A.T * b))  # 看懂原理
 display(A.pinv() * b)
 display(A.pinv_solve(b))
-display(x_hat, _ := A.solve_least_squares(b))  # 使用软件
+display(x_hat := A.solve_least_squares(b))  # 使用软件
 
 display(A.T * A)
 display(A.T * b)

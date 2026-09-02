@@ -1,0 +1,19 @@
+# 正交性
+
+## 正交矩阵和格拉姆 - 施密特正交化
+
+[Sympy 怎么求 Q](../appendices/4.md#sympy-怎么求-q)
+
+```{python}
+from sympy import Matrix, pprint, GramSchmidt
+
+import sympy as sp
+
+a = sp.Matrix([[1], [-1], [0]])
+
+b = sp.Matrix([[2], [0], [-2]])
+
+c = sp.Matrix([[3], [-3], [3]])
+
+GramSchmidt([a, b, c], True)
+```
