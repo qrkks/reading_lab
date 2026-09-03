@@ -6,14 +6,11 @@
 
 ```{python}
 from sympy import Matrix, pprint, GramSchmidt
-import sympy as sp
 from IPython.display import display
 
-a = sp.Matrix([[1], [-1], [0]])
-
-b = sp.Matrix([[2], [0], [-2]])
-
-c = sp.Matrix([[3], [-3], [3]])
+a = Matrix([[1], [-1], [0]])
+b = Matrix([[2], [0], [-2]])
+c = Matrix([[3], [-3], [3]])
 
 display(GramSchmidt([a, b, c], True))
 display(*GramSchmidt([a, b, c], True))
@@ -31,4 +28,8 @@ A = sp.Matrix([
 ])
 display(A.QRdecomposition())
 display(*A.QRdecomposition())
+
+# 取矩阵的某一列
+display(A.col(0))
+display(A[:, 0])
 ```
