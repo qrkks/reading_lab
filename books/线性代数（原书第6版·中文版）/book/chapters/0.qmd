@@ -27,7 +27,7 @@ if str(repo_root) not in sys.path:
 from books.assets.reading_lab_display import display
 ```
 
-# 前言
+# 前言 {.unnumbered}
 
 ## A = CR
 

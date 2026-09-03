@@ -6,7 +6,6 @@
 
 ```{python}
 from sympy import Matrix, pprint, GramSchmidt
-
 import sympy as sp
 
 a = sp.Matrix([[1], [-1], [0]])
@@ -15,5 +14,16 @@ b = sp.Matrix([[2], [0], [-2]])
 
 c = sp.Matrix([[3], [-3], [3]])
 
-GramSchmidt([a, b, c], True)
+pprint(GramSchmidt([a, b, c], True))
+```
+
+```{python}
+import sympy as sp
+
+A = sp.Matrix([
+    [1, 2, 3],
+    [-1, 0, -3],
+    [0, -2, 3],
+])
+sp.pprint(A.QRdecomposition())
 ```

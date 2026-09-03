@@ -1,4 +1,4 @@
-# 前言
+# 前言 {.unnumbered}
 
 ## 那 sympy 能把 A 分解成 CR 吗？
 
