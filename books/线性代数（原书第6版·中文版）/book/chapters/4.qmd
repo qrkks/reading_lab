@@ -7,6 +7,7 @@
 ```{python}
 from sympy import Matrix, pprint, GramSchmidt
 import sympy as sp
+from IPython.display import display
 
 a = sp.Matrix([[1], [-1], [0]])
 
@@ -14,16 +15,20 @@ b = sp.Matrix([[2], [0], [-2]])
 
 c = sp.Matrix([[3], [-3], [3]])
 
-pprint(GramSchmidt([a, b, c], True))
+display(GramSchmidt([a, b, c], True))
+display(*GramSchmidt([a, b, c], True))
 ```
 
 ```{python}
 import sympy as sp
+from IPython.display import display
+
 
 A = sp.Matrix([
     [1, 2, 3],
     [-1, 0, -3],
     [0, -2, 3],
 ])
-sp.pprint(A.QRdecomposition())
+display(A.QRdecomposition())
+display(*A.QRdecomposition())
 ```
