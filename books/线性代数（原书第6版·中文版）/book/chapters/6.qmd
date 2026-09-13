@@ -1,0 +1,38 @@
+# 特征值和特征向量
+
+```{python}
+from sympy import Matrix, pprint
+from IPython.display import display
+
+A = Matrix([
+    [0.8, 0.3],
+    [0.2, 0.7],
+])
+
+display(A**2, A**3, A**100)
+```
+
+例 6.1
+
+```{python}
+from sympy import Matrix
+from IPython.display import display
+import sympy as sp
+
+lam = sp.symbols("lambda")
+
+A = sp.Matrix([
+    [sp.Rational(4, 5), sp.Rational(-3, 10)],
+    [sp.Rational(-1, 5), sp.Rational(7, 10)],
+])
+
+expr = (A - lam * sp.eye(2)).det()
+
+display(expr)
+display(sp.factor(expr))
+
+display((A - lam * sp.eye(2)).det())  # 按定义算 det(A-λI)
+display(A.charpoly(lam))  # 直接求特征多项式
+display(A.eigenvals())  # 直接求特征值；代数重数
+display(A.eigenvects())  # 直接求特征值；代数重数；特征向量
+```

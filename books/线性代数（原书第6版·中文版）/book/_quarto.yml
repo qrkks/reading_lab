@@ -12,6 +12,8 @@ book:
     - chapters/2.qmd
     - chapters/3.qmd
     - chapters/4.qmd
+    - chapters/5.qmd
+    - chapters/6.qmd
   appendices:
     - appendices/0.qmd
     - appendices/1.qmd
