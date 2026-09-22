@@ -1,0 +1,73 @@
+# 对角化和矩阵乘幂
+
+```{python}
+from sympy import Matrix, Rational
+from IPython.display import display
+
+A = Matrix([
+    [Rational(4, 5), Rational(3, 10)],
+    [Rational(1, 5), Rational(7, 10)],
+])
+
+S, D = A.diagonalize()
+
+display(A)
+display(S)
+display(D)
+
+# A = S D S^-1
+display(S * D * S.inv())
+
+# D = S^-1 A S
+display(S.inv() * A * S)
+```
+
+[向量$a^Ta aa^t$是有关系的，矩阵$A^TA AA^t$是没关系的？](../appendices/22.md#向量ata-aat是有关系的矩阵ata-aat是没关系的)
+
+```{python}
+from sympy import Matrix
+from IPython.display import display
+
+a = Matrix([1, 1, 1, 1])
+b = Matrix([2, 2, 2, 2])
+display(a.T * b)
+display(a * b.T)
+```
+```{python}
+from sympy import Matrix
+from IPython.display import display
+
+
+A = Matrix([
+    [1, 1, 1, 1],
+    [2, 2, 2, 2],
+])
+display(A.T * A)
+display(A * A.T)
+
+display(A[0, :])
+display(A.row(0))  # 取出第一行
+display(A[:, 0])
+display(A.col(0))  # 取出第一列
+```
+
+[`eig(rand(10,10)) ` sympy 能实现吗？](../appendices/22.md#eigrand1010-sympy-能实现吗)
+
+```{python}
+from sympy import Matrix
+from IPython.display import display
+
+A = Matrix([
+    [2, 1],
+    [0, 2],
+])
+
+display(*A.eigenvects())
+
+A = Matrix([
+    [0, 1],
+    [0, 0],
+])
+
+display(*A.eigenvects())
+```
