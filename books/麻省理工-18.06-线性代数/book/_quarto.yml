@@ -29,6 +29,7 @@ book:
     - chapters/20.qmd
     - chapters/21.qmd
     - chapters/22.qmd
+    - chapters/25.qmd
     - chapters/c1.md
     - chapters/c2.md
   appendices:
@@ -49,6 +50,7 @@ book:
     - appendices/19.md
     - appendices/21.md
     - appendices/22.md
+    - appendices/25.md
 
 number-depth: 2
 from: markdown+tex_math_single_backslash

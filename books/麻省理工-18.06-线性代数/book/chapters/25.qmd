@@ -1,0 +1,43 @@
+# 正定矩阵
+
+```{python}
+from sympy import Matrix
+from IPython.display import display
+
+A = Matrix([
+    [2, 6],
+    [6, 18],
+])
+display(A.is_positive_definite)
+display(A.is_positive_semidefinite)
+
+A = Matrix([
+    [2, 6],
+    [6, 19],
+])
+display(A.is_positive_definite)
+```
+
+[sympy 有函数判断正定吗？](../appendices/25.md#sympy-有函数判断正定吗)
+
+[sympy 里有函数算二次型吗？](../appendices/25.md#sympy-里有函数算二次型吗)
+
+```{python}
+from sympy import Matrix
+from IPython.display import display
+
+A = Matrix([
+    [2, -1, 0],
+    [-1, 2, -1],
+    [0, -1, 2],
+])
+display(A.is_positive_definite)
+for i in range(3):
+    display(A[: i + 1, : i + 1].det())
+display(*A.LUdecomposition())
+display(A.LUdecomposition()[1].diagonal())
+display(A.eigenvals())
+display(A.trace())
+```
+
+[sympy 取主子式，算主元，算特征值，算二次型](../appendices/25.md#sympy-取主子式算主元算特征值算二次型)
