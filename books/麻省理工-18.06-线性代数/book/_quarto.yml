@@ -30,6 +30,7 @@ book:
     - chapters/21.qmd
     - chapters/22.qmd
     - chapters/25.qmd
+    - chapters/28.qmd
     - chapters/c1.md
     - chapters/c2.md
   appendices:

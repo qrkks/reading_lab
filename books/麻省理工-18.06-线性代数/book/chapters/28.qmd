@@ -1,0 +1,59 @@
+# 相似矩阵和若尔当标准型
+
+```{python}
+from sympy import Matrix
+from IPython.display import display
+
+A = Matrix([
+    [4, 0],
+    [0, 4],
+])
+display(A.jordan_form())
+
+A = Matrix([
+    [4, 1],
+    [0, 4],
+])
+display(A.jordan_form())
+display(A.rank())
+display(A.eigenvals())
+
+A = Matrix([
+    [5, 1],
+    [-1, 3],
+])
+display(A.jordan_form())
+
+A = Matrix([
+    [4, 0],
+    [17, 4],
+])
+display(A.jordan_form())
+```
+
+```{python}
+from sympy import Matrix
+from IPython.display import display
+
+A = Matrix([
+    [4, 4],
+    [-3, 3],
+])
+display("A", "A.T", A, A.T)
+display("ATA", ATA := A.T * A)
+display("ATA.eigenvects()", ATA.eigenvects())
+display("AAT", AAT := A * A.T)
+display("AAT.eigenvects()", AAT.eigenvects())
+display("A.singular_value_decomposition()", *A.singular_value_decomposition())
+```
+
+```{python}
+from sympy import Matrix
+from IPython.display import display
+
+A = Matrix([
+    [4, 3],
+    [8, 6],
+])
+display(*A.singular_value_decomposition())
+```
