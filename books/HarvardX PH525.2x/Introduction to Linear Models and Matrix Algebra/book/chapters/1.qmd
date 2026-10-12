@@ -1,0 +1,29 @@
+# Week 1
+
+## 介绍练习
+
+### 1
+
+```{R}
+library(UsingR)
+data("father.son", package = "UsingR")
+head(father.son)
+mean(father.son$sheight)
+```
+
+### 2
+
+```{R}
+data("father.son", package = "UsingR")
+
+# 筛选父亲身高四舍五入后等于71英寸的儿子身高
+son_heights <- father.son$sheight[
+  round(father.son$fheight) == 71
+]
+
+# 查看筛选后的身高列表
+son_heights
+
+# 计算平均身高
+mean(son_heights)
+```

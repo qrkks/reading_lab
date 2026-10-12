@@ -1,0 +1,18 @@
+project:
+  type: book
+
+book:
+  title: "Introduction to Linear Models and Matrix Algebra"
+  author: "Rafael Irizarry"
+  date: "2026/10/12"
+  chapters:
+    - index.qmd
+
+
+format:
+  html:
+    theme:
+      - cosmo
+      - brand
+  pdf:
+    documentclass: scrreprt
