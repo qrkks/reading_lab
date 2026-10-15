@@ -1,8 +1,8 @@
 # Week 1
 
-## 介绍练习
+## Video 1
 
-### 1
+### 介绍练习
 
 ```{R}
 library(UsingR)
@@ -10,8 +10,6 @@ data("father.son", package = "UsingR")
 head(father.son)
 mean(father.son$sheight)
 ```
-
-### 2
 
 ```{R}
 data("father.son", package = "UsingR")
@@ -22,8 +20,185 @@ son_heights <- father.son$sheight[
 ]
 
 # 查看筛选后的身高列表
-son_heights
+print(son_heights)
 
 # 计算平均身高
-mean(son_heights)
+print(mean(son_heights))
+```
+
+## Video 2
+
+```{R}
+library(UsingR)
+str(father.son)
+y <- father.son$sheight
+print(head(y))
+```
+
+```{R}
+# 构造tt向量，前6个元素和截图匹配
+tt <- c(
+  0.000, 0.142, 0.283, 0.425, 0.567, 0.708
+)
+
+# 生成矩阵X
+X <- cbind(x1 = tt, x2 = tt^2)
+head(X)
+print(dim(X))
+```
+
+### 矩阵符号练习
+
+```{R}
+X <- matrix(1:1000, 100, 10)
+X[25, 3]
+```
+
+```{R}
+x <- 1:10
+A <- cbind(x, 2 * x, 3 * x, 4 * x, 5 * x)
+
+print(A[7, ]) # 提取第 7 行
+sum(A[7, ]) # 105
+```
+
+```{R}
+matrix(1:60, 20, 3)
+```
+
+```{R}
+matrix(1:60, 20, 3, byrow = TRUE)
+```
+
+```{R}
+x <- 11:20
+rbind(x, 2 * x, 3 * x)
+```
+
+```{R}
+x <- 1:40
+matrix(3 * x, 20, 2)
+```
+
+```{R}
+x <- seq(10, 1, -2)
+print(x)
+print(x[-1])
+print(tail(x, 1))
+```
+
+## Video 3
+
+```python
+import sympy as sp
+
+# 系数矩阵 A
+A = sp.Matrix([
+    [1, 1, 1],
+    [3, -2, 1],
+    [2, 1, -1],
+])
+
+# 右侧列向量 b
+b = sp.Matrix([6, 2, 1])
+
+# 表达式 A^{-1} b
+expr = A.inv() * b
+
+# 打印
+sp.pprint(A)
+sp.pprint(b)
+sp.pprint(expr)
+```
+
+```{R}
+X <- matrix(1:12, 4, 3)
+print(X)
+
+a <- 2
+print(a * X)
+```
+
+```{R}
+X <- matrix(c(1, 3, 2, 1, -2, 1, 1, 1, -1), 3, 3)
+beta <- c(3, 2, 1)
+X %*% beta # 矩阵乘法
+```
+
+```{R}
+X <- matrix(c(1, 3, 2, 1, -2, 1, 1, 1, -1), 3, 3)
+y <- matrix(c(6, 2, 1), 3, 1)
+solve(X) %*% y # 等价于 solve(X,y)
+solve(X, y)
+qr(X)
+```
+
+```{R}
+q <- qr.Q(qr(X))
+crossprod(q[, 1], q[, 2])
+isTRUE(all.equal(
+  as.numeric(crossprod(q[, 1], q[, 2])),
+  0
+))
+# TRUE
+```
+
+### 矩阵运算练习
+
+#### 1
+
+```{R}
+all.equal(t(t(X)), X)
+```
+
+```{R}
+ncol(X)
+matrix(1, ncol(X))
+X %*% matrix(1, ncol(X))
+X
+print(str(X))
+t(matrix(1, ncol(X)))
+str(t(matrix(1, ncol(X))))
+```
+
+```{R}
+ncol(X)
+diag(ncol(X))
+```
+
+#### 2
+
+```{R}
+A <- matrix(
+  c(
+    3, 2, 1, 5,
+    4, 2, -1, 0,
+    -5, 2, 5, 0,
+    1, -1, -5, 1
+  ),
+  nrow = 4, ncol = 4
+)
+b <- matrix(c(10, 5, 7, 4), 4, 1)
+solve(A, b)
+```
+
+#### 3
+
+```{R}
+a <- matrix(1:12, nrow = 4)
+b <- matrix(1:15, nrow = 3)
+a
+b
+a %*% b
+(a %*% b)[3, 2]
+```
+
+#### 4
+
+```{R}
+print(a[3, ])
+print(b[, 2])
+sum(a[3, ] * b[, 2])
+crossprod(a[3, ], b[, 2])
+t(a[3, ]) %*% b[, 2]
 ```
