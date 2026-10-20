@@ -28,7 +28,19 @@ books/
 quarto render "books/书名/book" --to html
 ```
 
-推送到 `main` 后，`.github/workflows/quarto-pages.yml` 会递归扫描 `books/` 下所有 `book/_quarto.yml`，渲染 HTML，并把书加入 Pages 首页列表；README 不需要手动维护书单。Pages 首页名称和发布路径仍使用 `book/` 的上一级目录名，例如 `Introduction to Linear Models and Matrix Algebra`。
+推送到 `main` 后，`.github/workflows/quarto-pages.yml` 会递归扫描 `books/` 下所有 `book/_quarto.yml`，渲染 HTML，并把书加入 Pages 首页列表；README 不需要手动维护书单。
+
+首页列表由 `scripts/build_book_index.py` 按目录层级自动生成：书名使用 `book/` 的上一级目录名，更上层的课程或系列目录显示为分组标题，组内书籍缩进展示，支持多层目录，默认全部展开。直接位于 `books/` 下的书籍仍直接列出。只有包含书籍的目录才会出现在列表中，`assets/` 等辅助目录不会形成分组。
+
+这只影响首页列表的组织方式。书籍发布路径仍由 workflow 中的 `book_slug` 决定，例如 `Introduction to Linear Models and Matrix Algebra`。CI 会把每本书的目录和实际发布路径传给首页生成脚本，因此调整分组目录不会改变已有链接。
+
+本地可以只生成首页，查看列表结构，无需重新渲染全部书籍：
+
+```powershell
+python scripts/build_book_index.py --output temp-pages/index.html
+```
+
+不传 `--manifest` 时，脚本会扫描本地 `books/`，并使用书名作为发布路径，与当前 workflow 的默认规则一致。
 
 ## R 代码执行
 
