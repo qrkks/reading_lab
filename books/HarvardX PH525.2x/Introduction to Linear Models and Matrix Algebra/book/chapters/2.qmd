@@ -1,0 +1,43 @@
+# Week 2
+
+## Video 1
+
+```{R}
+library(UsingR)
+y <- father.son$sheight
+# print(y)
+print(mean(y))
+class(y)
+```
+
+```{R}
+N <- length(y)
+N
+Y <- matrix(y, N, 1)
+head(Y)
+A <- matrix(1, N, 1)
+head(A)
+barY <- t(A) %*% Y / N ### equivalent to
+# barY <- crossprod(A,Y)/N
+print(barY)
+class(barY)
+```
+
+```{R}
+r <- y - as.vector(barY)
+crossprod(r) / (N - 1)
+
+var(y)
+```
+
+```{R}
+library(UsingR)
+x <- father.son$fheight
+y <- father.son$sheight
+X <- cbind(1, x)
+head(X)
+betahat <- solve(t(X) %*% X) %*% t(X) %*% y
+### or
+betahat <- solve(crossprod(X)) %*% crossprod(X, y)
+print(betahat)
+```

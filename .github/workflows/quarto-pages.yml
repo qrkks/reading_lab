@@ -29,6 +29,21 @@ jobs:
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
 
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.5.3"
+
+      - name: Install R dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::knitr
+            any::rmarkdown
+            any::UsingR
+          dependencies: '"hard"'
+          install-quarto: false
+
       - name: Set up Julia
         uses: julia-actions/setup-julia@v2
         with:
@@ -115,7 +130,7 @@ jobs:
             <ul>
           HTML
 
-          find books -mindepth 3 -maxdepth 3 -name _quarto.yml -print0 |
+          find books -type f -path '*/book/_quarto.yml' -print0 |
             sort -z |
             while IFS= read -r -d '' config; do
               book_dir="$(dirname "$config")"

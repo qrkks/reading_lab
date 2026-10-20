@@ -2,7 +2,7 @@
 
 ## 新增一本书
 
-每本书保持独立的 Quarto book project，目录结构约定为：
+每本书保持独立的 Quarto book project，书名目录可以直接位于 `books/` 下，也可以按课程或系列再分一层，例如：
 
 ```text
 books/
@@ -12,6 +12,14 @@ books/
       index.qmd
       chapters/
         1.md
+  HarvardX PH525.2x/
+    Introduction to Linear Models and Matrix Algebra/
+      book/
+        _quarto.yml
+        index.qmd
+        chapters/
+          1.qmd
+          2.qmd
 ```
 
 新增后本地先渲染确认：
@@ -20,7 +28,23 @@ books/
 quarto render "books/书名/book" --to html
 ```
 
-推送到 `main` 后，`.github/workflows/quarto-pages.yml` 会自动扫描 `books/*/book/_quarto.yml`，渲染 HTML，并把书加入 Pages 首页列表；README 不需要手动维护书单。
+推送到 `main` 后，`.github/workflows/quarto-pages.yml` 会递归扫描 `books/` 下所有 `book/_quarto.yml`，渲染 HTML，并把书加入 Pages 首页列表；README 不需要手动维护书单。Pages 首页名称和发布路径仍使用 `book/` 的上一级目录名，例如 `Introduction to Linear Models and Matrix Algebra`。
+
+## R 代码执行
+
+包含 R 代码块的 QMD 由 Quarto 的 knitr 引擎执行。CI 使用 R 4.5.3，并安装、缓存 `knitr`、`rmarkdown` 和 HarvardX 课程使用的 `UsingR` 包及其必要依赖。
+
+本地首次渲染前，在 R 中安装依赖：
+
+```r
+install.packages(c("knitr", "rmarkdown", "UsingR"))
+```
+
+然后渲染整本书（包括 Week 1、Week 2）：
+
+```powershell
+quarto render "books/HarvardX PH525.2x/Introduction to Linear Models and Matrix Algebra/book" --to html
+```
 
 ## Python 与 Julia 混写
 
